@@ -4,44 +4,14 @@
 ############################################################
 ### V1.0 Import Blocklist Files to IPTables
 ### Changes
-##    v0.1.0 - Initial Release 2022-07-24
-##
-############################################################
-### Planned future changes (in no particular order)
-##  1. Allow cron to take the download file and chain name as variables
-##  2. Incorporate IPv6 IP addresses
-##  3. If a firewall rule exists in the chain but with a different action, consider removing and adding the new one
-##  4. Check if the path is a path or a file/path for all variables
-##      BASE_PATH_CheckPath=${BASE_PATH%/*}
-##      BASE_PATH_CheckFile=${BASE_PATH##*/}
-##      echo "PATH [ $BASE_PATH_CheckPath ]"
-##      echo "FILE [ $BASE_PATH_CheckFile ]"
-##  5. Check if BASE_PATH is a valid and/or a 'bad' path like in /proc/ or something
-##  6. --DONE-- Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line
-##  7. Check if the ACTION is the same each time and change it if it's different e.g. DROP to REJECT?
-##  8. Consider removing the variables for the programs being used, I don't really think these are necessary because
-##         the ones being used are mostly 'standard' - Check if they are POSIX, or alternatives.
-##         Others being used are: date, touch, echo, if, exit, rm, mv, cp, wc, sed, comm, cat, etc.
-##
+##    v0.1.0 - 2022-07-24 Initial Release
+##    v0.1.1 - 2022-07-24 minor aesthetic changes
+##		Removed header information from this file and added to README
+##		Added $CHAINNAME to success email
+##		Reformatted failure email
 ##
 ############################################################
 ############################################################
-
-
-## Basic setup
-# Copy all files into one folder
-# Set the script file to be executable
-#      sudo chmod 700 aubs-blocklist-import.sh
-# Create two files in the same folder if you haven't already:
-#      override-allowlist.txt
-#      override-blocklist.txt
-# Create the folder and set the location of the logfile
-#      LOGFILE_PATH="/var/log/blocklist/"
-# Create a CRON entry to run at 01:30 daily
-#     sudo nano /etc/crontab
-#     #Blocklist Importer
-#     30 1 * * * root /Path/To/MyScripts/aubs-blocklists/aubs-blocklist-import.sh
-
 
 START_FROM_SCRATCH=false
 DELETE_ALL_FILES_ON_COMPLETION=true
@@ -222,9 +192,15 @@ then
 		<html>
 			<head></head>
 			<body>
-				<b>IP Blocklist script update FAILED</b>
+				<b>IP Blocklist script update FAILED:</b>
 				<br/><br/>
-				$BodyResponse
+				<table>
+					<tr><td>URL</td><td>$BodyResponse</td></tr>
+					<tr><td>Chain Name</td><td>$CHAINNAME</td></tr>
+					<tr><td>Date</td><td>$(date "+%F %T (%Z)")</td></tr>
+					<tr><td>Server</td><td>`uname -a`</td></tr>
+				</table>
+				
 			</body>
 		</html>
 	"
@@ -466,6 +442,7 @@ BODY="
 		<br/><br/>
 		<table>
 			<tr><td>Start From Scratch</td><td>$START_FROM_SCRATCH</td></tr>
+			<tr><td>Chain Name</td><td>$CHAINNAME</td></tr>
 			<tr><td>Originally Loaded</td><td>$(wc -l < $BLOCKLIST_EXISTING)</td></tr>
 			<tr><td>Downloaded</td><td>$(wc -l < $BLOCKLIST_ORIGINAL)</td></tr>
 			<tr><td>Override Allow (original)</td><td>$(wc -l < $OVERRIDE_ALLOWLIST)</td></tr>
