@@ -244,9 +244,9 @@ LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
 
 if [ ! -r $OVERRIDE_ALLOWLIST ]
 then
-	LogThis -s "Override Allowlist file doesn't exist.  Creating it..."
+	LogThis -s "Override allow-list file doesn't exist.  Creating it..."
 	#Because the OVERRIDE_ALLOWLIST file doesn't exist, we need to create it and add the header info
-	echo -e "# Add IP addresses to this list, one on each line, to make sure they are never blocked\n" >> $OVERRIDE_ALLOWLIST
+	echo -e "# Add IP addresses to this list, one on each line, to make sure they are never blocked" >> $OVERRIDE_ALLOWLIST
 	if [ -r $OVERRIDE_ALLOWLIST ]
 	then
 		LogThis -e "Done"
@@ -284,10 +284,10 @@ LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
 
 if [ ! -r $OVERRIDE_BLOCKLIST ]
 then
-	LogThis -s "Override Blocklist file doesn't exist.  Creating it..."
+	LogThis -s "Override block-list file doesn't exist.  Creating it..."
 	#Because the OVERRIDE_BLOCKLIST file doesn't exist, we need to create it and add the header info
 	touch $OVERRIDE_BLOCKLIST
-	echo -e "# Add IP addresses to this list, one on each line, to make sure they are always blocked and never allowed\n" >> $OVERRIDE_BLOCKLIST
+	echo -e "# Add IP addresses to this list, one on each line, to make sure they are always blocked and never allowed" >> $OVERRIDE_BLOCKLIST
 	if [ -r $OVERRIDE_BLOCKLIST ]
 	then
 		LogThis -e "Done"
