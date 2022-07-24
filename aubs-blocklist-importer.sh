@@ -237,7 +237,7 @@ $SORT_PATH -u $BLOCKLIST_FILE -o $BLOCKLIST_DEDUPE 2>&1
 ## Copy the dedupe output to the main file
 cp -f $BLOCKLIST_DEDUPE $BLOCKLIST_FILE
 
-LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
+LogThis -e "[$(wc -l < $BLOCKLIST_FILE)]"
 
 
 ## ========== ========== ========== ========== ========== ##
@@ -278,7 +278,7 @@ comm -23 $BLOCKLIST_FILE $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP >> $BLOCKLIST_OVERRI
 ## Copy the override allow-list cleaned output to the main file
 cp -f $BLOCKLIST_OVERRIDE_ALLOWLIST $BLOCKLIST_FILE
 
-LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
+LogThis -e "[$(wc -l < $BLOCKLIST_FILE)]"
 
 ## ========== ========== ========== ========== ========== ##
 
@@ -315,7 +315,7 @@ $SORT_PATH -u $BLOCKLIST_FILE $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP -o $BLOCKLIST_O
 ## Copy the override block-list cleaned output to the main file
 cp -f $BLOCKLIST_OVERRIDE_BLOCKLIST $BLOCKLIST_FILE
 
-LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
+LogThis -e "[$(wc -l < $BLOCKLIST_FILE)]"
 
 ## ========== ========== ========== ========== ========== ##
 
