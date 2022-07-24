@@ -2,13 +2,15 @@
 
 ############################################################
 ############################################################
-### V1.0 Import Blocklist Files to IPTables
+### V1.1.2 Import Blocklist Files to IPTables
 ### Changes
 ##    v0.1.0 - 2022-07-24 Initial Release
 ##    v0.1.1 - 2022-07-24 minor aesthetic changes
 ##		Removed header information from this file and added to README
 ##		Added $CHAINNAME to success email
 ##		Reformatted failure email
+##    v0.1.2 - 2022-07-24 Override files change
+##		Changed the way overrides are processed if the file doesn't exist.
 ##
 ############################################################
 ############################################################
@@ -240,74 +242,80 @@ LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
 
 ## ========== ========== ========== ========== ========== ##
 
-if [ -r $OVERRIDE_ALLOWLIST ]
+if [ ! -r $OVERRIDE_ALLOWLIST ]
 then
-
-	LogThis -s "Removing Override allow-list IPs..."
-
-	## Sort the Override allow-list IPs in a temp file, removing any duplicates
-	$SORT_PATH -u $OVERRIDE_ALLOWLIST -o $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
-
-	## Remove lines that begin with a letter (a-z or A-Z) or # comments
-	sed -i '/^[a-z,A-Z,\#\]/d' $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
-	## Remove blank lines
-	sed -i '/^$/d' $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
-
-	LogThis -m "($(wc -l < $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP) unique)"
-
-	## Use COMM to filter the items:
-	# -1 = exclude column 1 (lines unique to FILE1)
-	# -2 = exclude column 2 (lines unique to FILE2)
-	# -3 = exclude column 3 (lines that appear in both files)
-	# Include only lines unique to FILE1 [exclude anything that is in the override allow-list]
-	comm -23 $BLOCKLIST_FILE $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP >> $BLOCKLIST_OVERRIDE_ALLOWLIST
-
-	## Copy the override allow-list cleaned output to the main file
-	cp -f $BLOCKLIST_OVERRIDE_ALLOWLIST $BLOCKLIST_FILE
-
-	LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
-
-else
-	LogThis -s "Unable to remove Override allow-list IPs... File does not exist"
-	#Because the OVERRIDE_ALLOWLIST file doesn't exist, we need to touch it to create it and then touch the other files
-	touch $OVERRIDE_ALLOWLIST
-	touch $BLOCKLIST_OVERRIDE_ALLOWLIST
-	touch $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
+	LogThis -s "Override Allowlist file doesn't exist.  Creating it..."
+	#Because the OVERRIDE_ALLOWLIST file doesn't exist, we need to create it and add the header info
+	echo -e "# Add IP addresses to this list, one on each line, to make sure they are never blocked\n" >> $OVERRIDE_ALLOWLIST
+	if [ -r $OVERRIDE_ALLOWLIST ]
+	then
+		LogThis -e "Done"
+	else
+		LogThis -e "Failed"
+		exit 1
+	fi
 fi
 
-	## ========== ========== ========== ========== ========== ##
+LogThis -s "Removing Override allow-list IPs..."
 
-if [ -r $OVERRIDE_BLOCKLIST ]
+## Sort the Override allow-list IPs in a temp file, removing any duplicates
+$SORT_PATH -u $OVERRIDE_ALLOWLIST -o $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
+
+## Remove lines that begin with a letter (a-z or A-Z) or # comments
+sed -i '/^[a-z,A-Z,\#\]/d' $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
+## Remove blank lines
+sed -i '/^$/d' $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
+
+LogThis -m "($(wc -l < $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP) unique)"
+
+## Use COMM to filter the items:
+# -1 = exclude column 1 (lines unique to FILE1)
+# -2 = exclude column 2 (lines unique to FILE2)
+# -3 = exclude column 3 (lines that appear in both files)
+# Include only lines unique to FILE1 [exclude anything that is in the override allow-list]
+comm -23 $BLOCKLIST_FILE $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP >> $BLOCKLIST_OVERRIDE_ALLOWLIST
+
+## Copy the override allow-list cleaned output to the main file
+cp -f $BLOCKLIST_OVERRIDE_ALLOWLIST $BLOCKLIST_FILE
+
+LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
+
+## ========== ========== ========== ========== ========== ##
+
+if [ ! -r $OVERRIDE_BLOCKLIST ]
 then
-
-	LogThis -s "Adding Override block-list IPs... "
-
-	## Sort the Override block-list IPs in a temp file, removing any duplicates
-	$SORT_PATH -u $OVERRIDE_BLOCKLIST -o $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP
-
-	## Remove lines that begin with a letter (a-z or A-Z) or # comments
-	sed -i '/^[a-z,A-Z,\#\]/d' $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP
-	## Remove blank lines
-	sed -i '/^$/d' $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP
-
-	LogThis -m "($(wc -l < $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP) unique)"
-
-	## Merge the blocklist file with the override block-list, removing duplicates
-	$SORT_PATH -u $BLOCKLIST_FILE $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP -o $BLOCKLIST_OVERRIDE_BLOCKLIST
-
-	## Copy the override block-list cleaned output to the main file
-	cp -f $BLOCKLIST_OVERRIDE_BLOCKLIST $BLOCKLIST_FILE
-
-	LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
-
-else
-	LogThis -s "Unable to add Override block-list IPs... File does not exist"
-	#Because the OVERRIDE_BLOCKLIST file doesn't exist, we need to touch it to create it and then touch the other files
+	LogThis -s "Override Blocklist file doesn't exist.  Creating it..."
+	#Because the OVERRIDE_BLOCKLIST file doesn't exist, we need to create it and add the header info
 	touch $OVERRIDE_BLOCKLIST
-	touch $BLOCKLIST_OVERRIDE_BLOCKLIST
-	touch $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP
+	echo -e "# Add IP addresses to this list, one on each line, to make sure they are always blocked and never allowed\n" >> $OVERRIDE_BLOCKLIST
+	if [ -r $OVERRIDE_BLOCKLIST ]
+	then
+		LogThis -e "Done"
+	else
+		LogThis -e "Failed"
+		exit 1
+	fi
 fi
 
+LogThis -s "Adding Override block-list IPs... "
+
+## Sort the Override block-list IPs in a temp file, removing any duplicates
+$SORT_PATH -u $OVERRIDE_BLOCKLIST -o $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP
+
+## Remove lines that begin with a letter (a-z or A-Z) or # comments
+sed -i '/^[a-z,A-Z,\#\]/d' $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP
+## Remove blank lines
+sed -i '/^$/d' $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP
+
+LogThis -m "($(wc -l < $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP) unique)"
+
+## Merge the blocklist file with the override block-list, removing duplicates
+$SORT_PATH -u $BLOCKLIST_FILE $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP -o $BLOCKLIST_OVERRIDE_BLOCKLIST
+
+## Copy the override block-list cleaned output to the main file
+cp -f $BLOCKLIST_OVERRIDE_BLOCKLIST $BLOCKLIST_FILE
+
+LogThis -e "[$(wc -l < $BLOCKLIST_FILE) total to block]"
 
 ## ========== ========== ========== ========== ========== ##
 
