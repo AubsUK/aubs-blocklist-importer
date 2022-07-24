@@ -164,7 +164,7 @@ LogThis "=======================================================================
 LogThis ""
 
 ## Check that the base path is correctly set up, otherwise we might run into issues
-if [ "$BASE_PATH" != "" ] && [ "${BASE_PATH:0:1}" == "/" ] && [ -d "$BASE_PATH" ]; then LogThis "Using Base Path [ $BASE_PATH ],"; fi;
+if [ "$BASE_PATH" != "" ] && [ "${BASE_PATH:0:1}" == "/" ] && [ -d "$BASE_PATH" ]; then LogThis "Using Base Path [ $BASE_PATH ]"; fi;
 
 ## Check the commands used are valid, otherwise we might run into ussues
 if [ `command -v $IPTABLES_PATH` == "" ]; then LogThis "Cannot find [ $IPTABLES_PATH ]. Is it installed? Exiting"; exit 1; fi;
