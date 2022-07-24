@@ -182,7 +182,7 @@ DeleteAllFiles
 
 ## ========== ========== ========== ========== ========== ##
 
-LogThis -s "Downloading the most recent IP list from $DOWNLOAD_FILE ..."
+LogThis -s "Downloading the most recent IP list from $DOWNLOAD_FILE..."
 wgetOK=$($WGET_PATH -qO - $DOWNLOAD_FILE > $BLOCKLIST_FILE) 2>&1
 if [ $? -ne 0 ]
 then
@@ -323,7 +323,7 @@ LogThis -e "[$(wc -l < $BLOCKLIST_FILE)]"
 if [ "$START_FROM_SCRATCH" = true ]
 then
 	LogThis ""
-	LogThis "Start-From-Scratch set.  Resetting IPTable and IPSet for [$CHAINNAME] ..."
+	LogThis "Start-From-Scratch set.  Resetting IPTable and IPSet for '$CHAINNAME'..."
 
 	if [ `$IPTABLES_PATH -L -n | $GREP_PATH "Chain $CHAINNAME" | wc -l` -gt 0 ]; 
 		then sudo $IPTABLES_PATH --flush $CHAINNAME 2>&1; LogThis "    Flushed IPTable Chain"; 
@@ -345,7 +345,7 @@ fi
 ## ========== ========== ========== ========== ========== ##
 
 LogThis ""
-LogThis -s "Checking the IPSet configuration for the '$CHAINNAME' IP set ..."
+LogThis -s "Checking the IPSet configuration for the '$CHAINNAME' IP set..."
 if [ `$IPSET_PATH list | $GREP_PATH "Name: $CHAINNAME" | wc -l` -eq 0 ]
 then
 	# Create the new IPSET set
@@ -371,7 +371,7 @@ fi
 
 ## ========== ========== ========== ========== ========== ##
 
-LogThis -s "Checking the chain '$CHAINNAME' exists in the IPTables INPUT ..."
+LogThis -s "Checking the chain '$CHAINNAME' exists in the IPTables INPUT..."
 # Insert rule (if necesarry) into the INPUT chain so the chain above will also be used
 if [ `$IPTABLES_PATH -L INPUT | $GREP_PATH $CHAINNAME | wc -l` -eq 0 ]
 then
@@ -385,7 +385,7 @@ fi
 
 ## ========== ========== ========== ========== ========== ##
 
-LogThis -s "Checking a firewall rule exists in the '$CHAINNAME' chain ..."
+LogThis -s "Checking a firewall rule exists in the '$CHAINNAME' chain..."
 if [ `$IPTABLES_PATH -L $CHAINNAME | $GREP_PATH $ACTION | wc -l` -eq 0 ]
 then
 	# Create the one and only firewall rule
