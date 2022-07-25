@@ -26,10 +26,10 @@ This is a simple blocklist import script that works with single IPv4 addresses (
 - Checks for an existing chain and that everything is already set up, or creates them
 - Compares the new import blocklist against the existing blocked list
   - only import new IPs
-  - removes old IPs not on the new list
+  - remove old IPs not on the new list
 - Checks the new live list matches the filtered import list
   - If it doesn't, it clears the configuration and tries to re-import the previous (known-good) list
-  - If then checks if the re-import of the known-good list is successful 
+  - It then checks if the re-import of the known-good list is successful
 - Full logging
 - Email notifications
 
