@@ -5,21 +5,21 @@
 ### V0.2.0 Import Blocklist Files to IPTables
 ### https://github.com/AubsUK/aubs-blocklist-importer
 ### Changes
-##    v0.1.0 - 2022-07-24 Initial Release
-##    v0.1.1 - 2022-07-24 minor aesthetic changes
+##	v0.1.0 - 2022-07-24 Initial Release
+##	v0.1.1 - 2022-07-24 minor aesthetic changes
 ##		Removed header information from this file and added to README
 ##		Added $CHAINNAME to success email
 ##		Reformatted failure email
-##    v0.1.2 - 2022-07-24 Override files change
+##	v0.1.2 - 2022-07-24 Override files change
 ##		Changed the way overrides are processed if the file doesn't exist.
-##    v0.1.3 - 2022-07-25 Changed logfile location
-##    v0.2.0 - 2022-07-25 Added a check to make sure it's all worked
-##		After importing, check that the downloaded and filtered list matches the new list
-##        If the check fails, it'll try and restore the previously loaded list and check again
-##      Modified final email notification to include success/failure if restoring
-##      Changed logfile name
-##      Moved clear/check/create IPTables configuration
-##      
+##	v0.1.3 - 2022-07-25 Changed logfile location
+##	v0.2.0 - 2022-07-25 Added a check to make sure it's all worked
+##		After importing, check download and live lists match;
+##			If check fails, try and restore the previously loaded list, check again
+##		Modified final email notification to include success/failure if restoring
+##		Changed logfile name
+##		Moved clear/check/create IPTables configuration
+##
 ############################################################
 ############################################################
 
