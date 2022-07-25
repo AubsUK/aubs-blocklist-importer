@@ -342,6 +342,8 @@ This is a simple blocklist import script that works with single IPv4 addresses (
   8. Work with subnets, expand them to individual IPs or if IPSet allows them.
   9. Enable/Disable email notifications, or set them to only send every X days.
   10. Using the same chain with multiple blocklists (perhaps download all at once, then filter through before adding - Size limitations?).
+  11. Check import was successful
+  12. Warn if any 'override allow' exist in the blocklist
 
 
 
