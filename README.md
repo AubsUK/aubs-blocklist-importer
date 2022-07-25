@@ -330,7 +330,7 @@ This is a simple blocklist import script that works with single IPv4 addresses (
 
 
 
-## Planned changes (in no particular order)
+# Planned changes (in no particular order)
 1. Allow cron to take the download file and chain name as variables
 2. Incorporate IPv6 IP addresses
 3. If a firewall rule exists in the chain, check if the ACTION is the same each time and change if it's different e.g. DROP to REJECT
