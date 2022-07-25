@@ -15,7 +15,12 @@ This is a simple blocklist import script that works with single IPv4 addresses (
 - Compares the new import blocklist against the existing blocked list
   - only import new IPs
   - removes old IPs not on the new list
+- Checks the new live list matches the filtered import list
+  - If it doesn't, it clears the configuration and tries to re-import the previous (known-good) list
+  - If then checks if the re-import of the known-good list is successful 
+- Full logging
 - Email notifications
+
 
 
   # Quick Start
