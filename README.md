@@ -1,6 +1,17 @@
-  # aubs-blocklist-importer
+# aubs-blocklist-importer
   Blocklist import script for IPTools/IPSet
   https://github.com/AubsUK/aubs-blocklist-importer
+
+
+# Table of Contents
+[Top of Page](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)<br/>
+[Information](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#information)<br/>
+[Quick Start](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#quick-start)<br/>
+[Configurable Options](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#configurable-options)<br/>
+[Planned changes](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#planned-changes-in-no-particular-order)<br/>
+[NOTES](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#notes)<br/>
+
+
 
 # Information
 This is a simple blocklist import script that works with single IPv4 addresses (no ranges or IPv6 support yet).
