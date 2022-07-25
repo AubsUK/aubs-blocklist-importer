@@ -24,7 +24,7 @@
 ############################################################
 
 START_FROM_SCRATCH=false
-DELETE_ALL_FILES_ON_COMPLETION=false
+DELETE_ALL_FILES_ON_COMPLETION=true
 
 
 ## Basic Settings
