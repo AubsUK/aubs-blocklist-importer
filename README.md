@@ -9,7 +9,7 @@
 [Quick Start](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#quick-start)<br/>
 [Configurable Options](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#configurable-options)<br/>
 [Planned changes](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#planned-changes-in-no-particular-order)<br/>
-[NOTES](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#notes)<br/>
+[Notes](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#notes)<br/>
 
 
 
@@ -365,6 +365,6 @@ aubs-blocklist.log
 
 
 
-# NOTES
+# Notes
 |[Back to top](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)|<br/><br/>
 This script was born through the need for a script to do exactly what I wanted.  I took a lot of inspiration from [Lexo.ch](https://www.lexo.ch/blog/2019/09/blocklist-de-iptables-ipset-update-script-how-to-automatically-update-your-firewall-with-the-ip-set-from-blocklist-de/), and lots of support from [Stack Overflow](https://stackoverflow.com/) and related sites, along with may other sites.
