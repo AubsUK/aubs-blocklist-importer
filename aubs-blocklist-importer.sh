@@ -2,7 +2,8 @@
 
 ############################################################
 ############################################################
-### V0.1.3 Import Blocklist Files to IPTables
+### V0.2.0 Import Blocklist Files to IPTables
+### https://github.com/AubsUK/aubs-blocklist-importer
 ### Changes
 ##    v0.1.0 - 2022-07-24 Initial Release
 ##    v0.1.1 - 2022-07-24 minor aesthetic changes
@@ -12,12 +13,18 @@
 ##    v0.1.2 - 2022-07-24 Override files change
 ##		Changed the way overrides are processed if the file doesn't exist.
 ##    v0.1.3 - 2022-07-25 Changed logfile location
-##
+##    v0.2.0 - 2022-07-25 Added a check to make sure it's all worked
+##		After importing, check that the downloaded and filtered list matches the new list
+##        If the check fails, it'll try and restore the previously loaded list and check again
+##      Modified final email notification to include success/failure if restoring
+##      Changed logfile name
+##      Moved clear/check/create IPTables configuration
+##      
 ############################################################
 ############################################################
 
 START_FROM_SCRATCH=false
-DELETE_ALL_FILES_ON_COMPLETION=true
+DELETE_ALL_FILES_ON_COMPLETION=false
 
 
 ## Basic Settings
@@ -45,7 +52,7 @@ OVERRIDE_ALLOWLIST_FILE="override-allowlist.txt"         # Override allow-list f
 OVERRIDE_BLOCKLIST_PATH=$BASE_PATH                       # Path for the override block-list (default is the same as the base path)
 OVERRIDE_BLOCKLIST_FILE="override-blocklist.txt"         # Override block-list filename
 LOGFILE_PATH="/var/log/aubs-blocklist-importer/"         # Path for the log file.  Should not contain the filename.
-LOGFILE_FILE="blocklist-importer.log"                    # Filename for the logging.
+LOGFILE_FILE="aubs-blocklist-importer.log"               # Filename for the logging.
 
 
 ## Programs used - If needed, set these manually to the required path (e.g. IPTABLES_PATH="/sbin/iptables")
@@ -75,23 +82,30 @@ OVERRIDE_BLOCKLIST=$OVERRIDE_BLOCKLIST_PATH$OVERRIDE_BLOCKLIST_FILE
 BLOCKLIST_BASE_FILEPATH=$BASE_PATH$BLOCKLIST_BASE_FILE
 
 # Temporary files created based on the base file.  All related files will be created in the same location
-BLOCKLIST_FILE=$BLOCKLIST_BASE_FILEPATH.download                     # Main file that the download list is imported into and processed
-BLOCKLIST_EXISTING=$BLOCKLIST_BASE_FILEPATH.existing                 # List of existing IPs from the current IP chain
-BLOCKLIST_ORIGINAL=$BLOCKLIST_FILE.Original                          # Copy of the original download file
-BLOCKLIST_IPV4=$BLOCKLIST_FILE.IPv4                                  # Downloaded file processed with only IPv4 addresses
-BLOCKLIST_OVERRIDE_ALLOWLIST=$BLOCKLIST_FILE.OverrideAllow           # Downloaded file processed with override allow-list addresses removed
-BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP=$BLOCKLIST_FILE.OverrideAllowTEMP  # Temporary override allow-list files sorted and deduped
-BLOCKLIST_OVERRIDE_BLOCKLIST=$BLOCKLIST_FILE.OverrideBlock           # Downloaded file processed with override block-list addresses added
-BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP=$BLOCKLIST_FILE.OverrideBlockTEMP  # Temporary override block-list files sorted and deduped
-BLOCKLIST_DEDUPE=$BLOCKLIST_FILE.Dedupe                              # Downloaded file processed with duplicates removed
-BLOCKLIST_COMPARE=$BLOCKLIST_FILE.compare                            # Comparison between processed download file and existing list
-BLOCKLIST_COMPARE_ADD=$BLOCKLIST_FILE.compare.add                    # Items processed that aren't in the existing (to be added)
-BLOCKLIST_COMPARE_REM=$BLOCKLIST_FILE.compare.rem                    # Existing items that aren't in the processed (to be removed)
+BLOCKLIST_FILE=$BLOCKLIST_BASE_FILEPATH.download                         # Main file that the download list is imported into and processed
+BLOCKLIST_EXISTING=$BLOCKLIST_BASE_FILEPATH.existing                     # List of existing IPs from the current IP chain
+BLOCKLIST_EXISTING_CHECK1=$BLOCKLIST_BASE_FILEPATH.existing.check1       # List of IPs to confirm successful import
+BLOCKLIST_EXISTING_VALIDATE1=$BLOCKLIST_BASE_FILEPATH.existing.validate1 # List of IPs remaining after checking
+BLOCKLIST_EXISTING_CHECK2=$BLOCKLIST_BASE_FILEPATH.existing.check2       # List of IPs to confirm successful import
+BLOCKLIST_EXISTING_VALIDATE2=$BLOCKLIST_BASE_FILEPATH.existing.validate2 # List of IPs remaining after checking
+BLOCKLIST_ORIGINAL=$BLOCKLIST_FILE.Original                              # Copy of the original download file
+BLOCKLIST_IPV4=$BLOCKLIST_FILE.IPv4                                      # Downloaded file processed with only IPv4 addresses
+BLOCKLIST_OVERRIDE_ALLOWLIST=$BLOCKLIST_FILE.OverrideAllow               # Downloaded file processed with override allow-list addresses removed
+BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP=$BLOCKLIST_FILE.OverrideAllowTEMP      # Temporary override allow-list files sorted and deduped
+BLOCKLIST_OVERRIDE_BLOCKLIST=$BLOCKLIST_FILE.OverrideBlock               # Downloaded file processed with override block-list addresses added
+BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP=$BLOCKLIST_FILE.OverrideBlockTEMP      # Temporary override block-list files sorted and deduped
+BLOCKLIST_DEDUPE=$BLOCKLIST_FILE.Dedupe                                  # Downloaded file processed with duplicates removed
+BLOCKLIST_COMPARE=$BLOCKLIST_FILE.compare                                # Comparison between processed download file and existing list
+BLOCKLIST_COMPARE_ADD=$BLOCKLIST_FILE.compare.add                        # Items processed that aren't in the existing (to be added)
+BLOCKLIST_COMPARE_REM=$BLOCKLIST_FILE.compare.rem                        # Existing items that aren't in the processed (to be removed)
 
 
 ## If the logfile path doesn't exist, make it, then touch the file to create it if needed
 mkdir -p $LOGFILE_PATH
 touch $LOGFILE_LOCATION
+
+
+
 
 ## Function to log to the log file and output to the screen if run manually
 LogThis() {
@@ -137,6 +151,8 @@ LogThis() {
 }
 
 
+
+
 ## Function to send an email
 SendEmailNow()
 {
@@ -152,6 +168,8 @@ SendEmailNow()
 }
 
 
+
+
 ## Function to delete all files relating to the 'base' file name in the 'base' path
 DeleteAllFiles()
 {
@@ -159,6 +177,55 @@ DeleteAllFiles()
 	LogThis "Deleting any existing blocklist files. ($BLOCKLIST_BASE_FILEPATH.*)"
 	rm -f "$BLOCKLIST_BASE_FILEPATH".*
 }
+
+
+
+
+## Function to clear the IPTables configuration for this $CHAINNAME
+ResetChain()
+{
+	if [ `$IPTABLES_PATH -L -n | $GREP_PATH "Chain $CHAINNAME" | wc -l` -gt 0 ]; 
+		then $IPTABLES_PATH --flush $CHAINNAME 2>&1; LogThis "    Flushed IPTable Chain"; 
+		else LogThis "    No IPTable Chain to flush"; fi
+	if [ `$IPSET_PATH list | $GREP_PATH "Name: $CHAINNAME" | wc -l` -gt 0 ]; 
+		then $IPSET_PATH flush $CHAINNAME 2>&1; LogThis "    Flushed IPSet Chain"; 
+		else LogThis "    No IPSet Chain to flush"; fi;
+	if [ `$IPSET_PATH list | $GREP_PATH "Name: $CHAINNAME" | wc -l` -gt 0 ]; 
+		then $IPSET_PATH destroy $CHAINNAME 2>&1; LogThis "    Destroyed IPSet Chain"; 
+		else LogThis "    No IPSet to destroy"; fi;
+	if [ `$IPTABLES_PATH -L INPUT | $GREP_PATH $CHAINNAME | wc -l` -gt 0 ]; 
+		then $IPTABLES_PATH -D INPUT -j $CHAINNAME; LogThis "    Deleted IPTable INPUT Join"; 
+		else LogThis "    No IPTable INPUT Join to delete"; fi;
+	if [ `$IPTABLES_PATH -L -n | $GREP_PATH "Chain $CHAINNAME" | wc -l` -gt 0 ]; 
+		then $IPTABLES_PATH -X $CHAINNAME; LogThis "    Deleted IPTable Chain"; 
+		else LogThis "    No IPTable Chain to delete"; fi;
+}
+
+
+
+
+## Function to check the IPTables config and create where required
+CheckConfig()
+{
+	# Checking the IPSet configuration
+	if [ `$IPSET_PATH list | $GREP_PATH "Name: $CHAINNAME" | wc -l` -eq 0 ];
+		then $IPSET_PATH create $CHAINNAME hash:ip maxelem 16777216 2>&1; LogThis "    New IP set created";
+		else LogThis "    IP set already exists"; fi;
+	# Checking the IPTables configuration
+	if [ `$IPTABLES_PATH -L -n | $GREP_PATH "Chain $CHAINNAME" | wc -l` -eq 0 ];
+		then $IPTABLES_PATH --new-chain $CHAINNAME 2>&1; LogThis "    New chain created";
+		else LogThis "    Chain already exists"; fi;
+	# Checking the chain exists in the IPTables INPUT and insert the rule if needed
+	if [ `$IPTABLES_PATH -L INPUT | $GREP_PATH $CHAINNAME | wc -l` -eq 0 ];
+		then $IPTABLES_PATH -I INPUT -j $CHAINNAME 2>&1; LogThis "    Chain added to INPUT";
+		else LogThis "    Chain already in INPUT"; fi;
+	# Checking a firewall rule exists in the chain
+	if [ `$IPTABLES_PATH -L $CHAINNAME | $GREP_PATH $ACTION | wc -l` -eq 0 ];
+		then $IPTABLES_PATH -I $CHAINNAME -m set --match-set $CHAINNAME src -j $ACTION 2>&1; LogThis "    Firewall rule created";
+		else LogThis "    Firewall rule already exists in the chain"; fi;
+}
+
+
 
 
 LogThis "================================================================================"
@@ -257,7 +324,7 @@ then
 	fi
 fi
 
-LogThis -s "Removing Override allow-list IPs..."
+LogThis -s "Removing Override allow-list IPs"
 
 ## Sort the Override allow-list IPs in a temp file, removing any duplicates
 $SORT_PATH -u $OVERRIDE_ALLOWLIST -o $BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP
@@ -324,78 +391,17 @@ LogThis -e "[$(wc -l < $BLOCKLIST_FILE)]"
 if [ "$START_FROM_SCRATCH" = true ]
 then
 	LogThis ""
-	LogThis "Start-From-Scratch set.  Resetting IPTable and IPSet for '$CHAINNAME'..."
-
-	if [ `$IPTABLES_PATH -L -n | $GREP_PATH "Chain $CHAINNAME" | wc -l` -gt 0 ]; 
-		then sudo $IPTABLES_PATH --flush $CHAINNAME 2>&1; LogThis "    Flushed IPTable Chain"; 
-		else LogThis "    No IPTable Chain to flush"; fi
-	if [ `$IPSET_PATH list | $GREP_PATH "Name: $CHAINNAME" | wc -l` -gt 0 ]; 
-		then sudo $IPSET_PATH flush $CHAINNAME 2>&1; LogThis "    Flushed IPSet Chain"; 
-		else LogThis "    No IPSet Chain to flush"; fi;
-	if [ `$IPSET_PATH list | $GREP_PATH "Name: $CHAINNAME" | wc -l` -gt 0 ]; 
-		then sudo $IPSET_PATH destroy $CHAINNAME 2>&1; LogThis "    Destroyed IPSet Chain"; 
-		else LogThis "    No IPSet to destroy"; fi;
-	if [ `$IPTABLES_PATH -L INPUT | $GREP_PATH $CHAINNAME | wc -l` -gt 0 ]; 
-		then sudo $IPTABLES_PATH -D INPUT -j $CHAINNAME; LogThis "    Deleted IPTable INPUT Join"; 
-		else LogThis "    No IPTable INPUT Join to delete"; fi;
-	if [ `$IPTABLES_PATH -L -n | $GREP_PATH "Chain $CHAINNAME" | wc -l` -gt 0 ]; 
-		then sudo $IPTABLES_PATH -X $CHAINNAME; LogThis "    Deleted IPTable Chain"; 
-		else LogThis "    No IPTable Chain to delete"; fi;
+	LogThis "Start-From-Scratch enabled.  Resetting IPTable and IPSet for '$CHAINNAME'..."
+	## Call the ResetChain function to clear the IPTables configuration for this chain
+	ResetChain
 fi
 
 ## ========== ========== ========== ========== ========== ##
 
+## Call the CheckConfig function to check the IPTables config and create where required
 LogThis ""
-LogThis -s "Checking the IPSet configuration for the '$CHAINNAME' IP set..."
-if [ `$IPSET_PATH list | $GREP_PATH "Name: $CHAINNAME" | wc -l` -eq 0 ]
-then
-	# Create the new IPSET set
-	$IPSET_PATH create $CHAINNAME hash:ip maxelem 16777216 2>&1
-	LogThis -e " New IP set created"
-else
-	### An IPSET set already exists.
-	LogThis -e " IP set already exists"
-fi
-
-## ========== ========== ========== ========== ========== ##
-
-LogThis -s "Checking the IPTables configuration for the '$CHAINNAME' chain..."
-if [ `$IPTABLES_PATH -L -n | $GREP_PATH "Chain $CHAINNAME" | wc -l` -eq 0 ]
-then
-	# Create the iptables chain
-	$IPTABLES_PATH --new-chain $CHAINNAME 2>&1
-	LogThis -e " New chain created"
-else
-	### An IPTABLES chain already exists.
-	LogThis -e " Chain already exists"
-fi
-
-## ========== ========== ========== ========== ========== ##
-
-LogThis -s "Checking the chain '$CHAINNAME' exists in the IPTables INPUT..."
-# Insert rule (if necesarry) into the INPUT chain so the chain above will also be used
-if [ `$IPTABLES_PATH -L INPUT | $GREP_PATH $CHAINNAME | wc -l` -eq 0 ]
-then
-	# Insert the chain into the INPUT
-	$IPTABLES_PATH -I INPUT -j $CHAINNAME 2>&1
-	LogThis -e " Chain added to INPUT"
-else
-	### The chain already exsits in the IPTables INPUT
-	LogThis -e " Chain already in INPUT"
-fi
-
-## ========== ========== ========== ========== ========== ##
-
-LogThis -s "Checking a firewall rule exists in the '$CHAINNAME' chain..."
-if [ `$IPTABLES_PATH -L $CHAINNAME | $GREP_PATH $ACTION | wc -l` -eq 0 ]
-then
-	# Create the one and only firewall rule
-	$IPTABLES_PATH -I $CHAINNAME -m set --match-set $CHAINNAME src -j $ACTION 2>&1
-	LogThis -e " Firewall rule created"
-else
-	### The firewall rule already exsits in the chain.
-	LogThis -e " Firewall rule already exists in the chain"
-fi
+LogThis "Checking the configuration for '$CHAINNAME'..."
+CheckConfig
 
 ## ========== ========== ========== ========== ========== ##
 
@@ -425,7 +431,6 @@ comm -23 $BLOCKLIST_FILE $BLOCKLIST_EXISTING >> $BLOCKLIST_COMPARE_ADD
 ## Include only lines unique to FILE2 [old items to remove]
 comm -13 $BLOCKLIST_FILE $BLOCKLIST_EXISTING >> $BLOCKLIST_COMPARE_REM
 
-
 ## Read all IPs from the ADD list and add them to the ipset filter
 LogThis -s "Adding [$(wc -l < $BLOCKLIST_COMPARE_ADD)] new IPs into the IP set..."
 for i in $( cat $BLOCKLIST_COMPARE_ADD ); do $IPSET_PATH add $CHAINNAME $i 2>&1; done
@@ -438,18 +443,105 @@ LogThis -e "Done"
 
 ## ========== ========== ========== ========== ========== ##
 
+LogThis ""
+LogThis -s "Checking imported '$CHAINNAME' matches downloaded list..."
+
+#sed -i '1,5d' $BLOCKLIST_FILE #TESTING1 == REMOVE THE FIRST FIVE LINES FROM THE FILTERED ORIGINAL FILE
+
+## Get the existing list of blacklisted IPs
+$IPSET_PATH list $CHAINNAME >> $BLOCKLIST_EXISTING_CHECK1
+## Remove lines that begin with a letter (a-z or A-Z) - the first 8 lines - from the existing list
+sed -i '/^[a-z,A-Z]/d' $BLOCKLIST_EXISTING_CHECK1
+## Remove blank lines
+sed -i '/^$/d' $BLOCKLIST_EXISTING_CHECK1
+## Sort the Existing list (the new list has already been sorted)
+$SORT_PATH -u $BLOCKLIST_EXISTING_CHECK1 -o $BLOCKLIST_EXISTING_CHECK1
+LogThis -m "Filtered Download [$(wc -l < $BLOCKLIST_FILE)] - Filtered Existing [$(wc -l < $BLOCKLIST_EXISTING_CHECK1)]..."
+## Use COMM to filter the items:
+# -1 = exclude column 1 (lines unique to FILE1)
+# -2 = exclude column 2 (lines unique to FILE2)
+# -3 = exclude column 3 (lines that appear in both files)
+## Include only lines unique to FILE1 and FILE2 [i.e. anything that isn't in both] - This should be 0
+comm -3 $BLOCKLIST_FILE $BLOCKLIST_EXISTING_CHECK1 >> $BLOCKLIST_EXISTING_VALIDATE1
+if [ $(wc -l < $BLOCKLIST_EXISTING_VALIDATE1) -eq 0 ]
+then
+	LogThis -e "Validated"
+	## All validated correctly
+	#    set the subject
+	#    no failure message
+	#    show the Validation Check 1 rows
+	#    don't show Validation Check 2 rows
+	VALIDATION_STATUS="SUCCESS - Updated with the newest IP list"
+	VALIDATION_MESSAGE="<p>IP Blocklist script successfully updated the IP set with the newest IP list</p>"
+	VALIDATION_CHECK1=""
+	VALIDATION_CHECK2="display:none;"
+	## Validation 2 files won't exist, so will cause an error later, let's touch them now to create them blank
+	touch $BLOCKLIST_EXISTING_CHECK2
+	touch $BLOCKLIST_EXISTING_VALIDATE2
+else
+	LogThis -e "ERROR !!! - They don't match"
+	LogThis "An error occurred with importing the download"
+	## Call the ResetChain function to clear the IPTables configuration for this chain
+	LogThis ""
+	LogThis "Resetting the chain"
+	ResetChain
+	## Call the CheckConfig function to create new configuration
+	LogThis "Creating a new chain"
+	CheckConfig
+	LogThis ""
+	LogThis -s "Importing the previous existing list..."
+	for i in $( cat $BLOCKLIST_EXISTING ); do $IPSET_PATH add $CHAINNAME $i 2>&1; done
+	LogThis -e "Done"
+#	sed -i '1,5d' $BLOCKLIST_EXISTING #TESTING2 == REMOVE THE FIRST FIVE LINES FROM THE ORIGINAL EXISTING FILE
+	#### Re-check
+	LogThis -s "Re-checking restored '$CHAINNAME' version matches original existing..."
+	$IPSET_PATH list $CHAINNAME >> $BLOCKLIST_EXISTING_CHECK2
+	sed -i '/^[a-z,A-Z]/d' $BLOCKLIST_EXISTING_CHECK2
+	sed -i '/^$/d' $BLOCKLIST_EXISTING_CHECK2
+	$SORT_PATH -u $BLOCKLIST_EXISTING_CHECK2 -o $BLOCKLIST_EXISTING_CHECK2
+	LogThis -m "Original [$(wc -l < $BLOCKLIST_EXISTING)] - Current [$(wc -l < $BLOCKLIST_EXISTING_CHECK2)]..."
+	comm -3 $BLOCKLIST_EXISTING $BLOCKLIST_EXISTING_CHECK2 >> $BLOCKLIST_EXISTING_VALIDATE2
+	if [ $(wc -l < $BLOCKLIST_EXISTING_VALIDATE2) -eq 0 ]
+	then
+		LogThis -e "Validated"
+		## Restoring the previous list worked
+		#    set the subject
+		#    Set the failure message
+		#    show the Validation Check 1 rows in red
+		#    show the Validation Check 2 rows in black
+		VALIDATION_STATUS="ERROR - Newest IP list update Faulure"
+		VALIDATION_MESSAGE="<p style="color:red"><strong>VALIDATION FAILED - Reverted to previous known good list</strong></p>"
+		VALIDATION_CHECK1="color:red;"
+		VALIDATION_CHECK2=""
+	else
+		LogThis -e "ERROR !!! - Still an issue"
+		## Restoring the previous list failed too
+		#    set the subject
+		#    Set the failure message
+		#    show the Validation Check 1 rows in red
+		#    show the Validation Check 2 rows in red
+		VALIDATION_STATUS="ERROR - CRITICAL FAILURE"
+		VALIDATION_MESSAGE="<p style="color:red"><strong>VALIDATION FAILED - UNABLE TO REVERT TO PREVIOUS KNOWN GOOD LIST</strong></p>"
+		VALIDATION_CHECK1="color:red;"
+		VALIDATION_CHECK2="color:red;"
+	fi
+fi
+
+## ========== ========== ========== ========== ========== ##
+
 TIME_DIFF=$(($(date +"%s")-${TIME_START}))
+LogThis ""
 LogThis "Process finished in $((${TIME_DIFF} / 60)) Minutes and $((${TIME_DIFF} % 60)) Seconds."
 
-
-SUBJECT+="SUCCESS - Updated with the newest IP list"
+SUBJECT+="$VALIDATION_STATUS"
 BODY="
 <html>
 	<head></head>
 	<body>
-		<b>IP Blocklist script updated the IP set with the newest IP list:</b>
-		<br/><br/>
+		$VALIDATION_MESSAGE
+		<!-- <br/><br/> -->
 		<table>
+			<tr><td><b>DETAILS</b></td><td>&nbsp;</td></tr>
 			<tr><td>Start From Scratch</td><td>$START_FROM_SCRATCH</td></tr>
 			<tr><td>Chain Name</td><td>$CHAINNAME</td></tr>
 			<tr><td>Originally Loaded</td><td>$(wc -l < $BLOCKLIST_EXISTING)</td></tr>
@@ -459,12 +551,19 @@ BODY="
 			<tr><td>Override Block (original)</td><td>$(wc -l < $OVERRIDE_BLOCKLIST)</td></tr>
 			<tr><td>Override Block (unique)</td><td>$(wc -l < $BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP)</td></tr>
 			<tr><td><b>PROCESSING</b></td><td>&nbsp;</td></tr>
-			<tr><td>IPv4 count</td><td>$(wc -l < $BLOCKLIST_IPV4)</td></tr>
-			<tr><td>Deduped</td><td>$(wc -l < $BLOCKLIST_DEDUPE)</td></tr>
-			<tr><td>Override Allow Cleared</td><td>$(wc -l < $BLOCKLIST_OVERRIDE_ALLOWLIST)</td></tr>
-			<tr><td>Override Block Cleared</td><td>$(wc -l < $BLOCKLIST_OVERRIDE_BLOCKLIST)</td></tr>
+			<tr><td>IPv4 Filtered</td><td>$(wc -l < $BLOCKLIST_IPV4)</td></tr>
+			<tr><td>Dedupe Filtered</td><td>$(wc -l < $BLOCKLIST_DEDUPE)</td></tr>
+			<tr><td>Override Allow Filtered</td><td>$(wc -l < $BLOCKLIST_OVERRIDE_ALLOWLIST)</td></tr>
+			<tr><td>Override Block Filtered</td><td>$(wc -l < $BLOCKLIST_OVERRIDE_BLOCKLIST)</td></tr>
+			<tr><td>Total Blocked</td><td>$(wc -l < $BLOCKLIST_FILE)</td></tr>
 			<tr><td>Added</td><td>$(wc -l < $BLOCKLIST_COMPARE_ADD)</td></tr>
 			<tr><td>Removed</td><td>$(wc -l < $BLOCKLIST_COMPARE_REM)</td></tr>
+			<tr><td><b>VALIDATION</b></td><td>&nbsp;</td></tr>
+			<tr style=\"$VALIDATION_CHECK1\"><td>Check (should match 'Total Blocked')</td><td>$(wc -l < $BLOCKLIST_EXISTING_CHECK1)</td></tr>
+			<tr style=\"$VALIDATION_CHECK1\"><td>Validation Difference (should be zero)</td><td>$(wc -l < $BLOCKLIST_EXISTING_VALIDATE1)</td></tr>
+			<tr style=\"$VALIDATION_CHECK2\"><td>Restore Check (should match 'Originally Loaded')</td><td>$(wc -l < $BLOCKLIST_EXISTING_CHECK2)</td></tr>
+			<tr style=\"$VALIDATION_CHECK2\"><td>Restore Validation Difference (should be zero)</td><td>$(wc -l < $BLOCKLIST_EXISTING_VALIDATE2)</td></tr>
+			<tr><td><b>SUMMARY</b></td><td>&nbsp;</td></tr>
 			<tr><td>Duration</td><td>$((${TIME_DIFF} / 60)) Minutes and $((${TIME_DIFF} % 60)) Seconds.</td></tr>
 			<tr><td>Date</td><td>$(date "+%F %T (%Z)")</td></tr>
 			<tr><td>Server</td><td>`uname -a`</td></tr>
