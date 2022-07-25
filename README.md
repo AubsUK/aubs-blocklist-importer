@@ -1,8 +1,21 @@
   # aubs-blocklist-importer
   Blocklist import script for IPTools/IPSet
+  https://github.com/AubsUK/aubs-blocklist-importer
 
-
-
+# Information
+This is a simple blocklist import script that works with single IPv4 addresses (no ranges or IPv6 support yet).
+- Runs automatically (via Cron)
+- Imports a list of IPs to block from a URL text file
+- Strips out anything non-IPv4 related
+- Removes duplicates
+- Custom lists to override the importing blocklist
+  - Allow list - Never block anything on this list even if it *is* in the download (e.g. your own or customer IPs)
+  - Block list - Always block anything on this list even if it *isn't* in the download (e.g. IPs of frequent attackers or spammers)
+- Checks for an existing chain and that everything is already set up, or creates them
+- Compares the new import blocklist against the existing blocked list
+  - only import new IPs
+  - removes old IPs not on the new list
+- Email notifications
 
 
   # Quick Start
@@ -326,6 +339,9 @@
   5. Check if BASE_PATH is a valid and/or a 'bad' path like in /proc/ or something
   6. --DONE-- ~~Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line~~
   7. Consider removing the variables for the programs being used, I don't really think these are necessary because the ones being used are mostly 'standard' - Check if they are POSIX, or alternatives.  Most others being used are: date, touch, echo, if, exit, rm, mv, cp, wc, sed, comm, cat.
+  8. Work with subnets, expand them to individual IPs or if IPSet allows them.
+  9. Enable/Disable email notifications, or set them to only send every X days.
+  10. Using the same chain with multiple blocklists (perhaps download all at once, then filter through before adding - Size limitations?).
 
 
 
