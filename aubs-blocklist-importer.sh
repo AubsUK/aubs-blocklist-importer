@@ -2,7 +2,7 @@
 
 ############################################################
 ############################################################
-### V1.1.2 Import Blocklist Files to IPTables
+### V1.1.3 Import Blocklist Files to IPTables
 ### Changes
 ##    v0.1.0 - 2022-07-24 Initial Release
 ##    v0.1.1 - 2022-07-24 minor aesthetic changes
@@ -11,6 +11,7 @@
 ##		Reformatted failure email
 ##    v0.1.2 - 2022-07-24 Override files change
 ##		Changed the way overrides are processed if the file doesn't exist.
+##    v0.1.3 - 2022-07-25 Changed logfile location
 ##
 ############################################################
 ############################################################
@@ -43,8 +44,8 @@ OVERRIDE_ALLOWLIST_PATH=$BASE_PATH                       # Path for the override
 OVERRIDE_ALLOWLIST_FILE="override-allowlist.txt"         # Override allow-list filename
 OVERRIDE_BLOCKLIST_PATH=$BASE_PATH                       # Path for the override block-list (default is the same as the base path)
 OVERRIDE_BLOCKLIST_FILE="override-blocklist.txt"         # Override block-list filename
-LOGFILE_PATH="/var/log/blocklist/"                       # Path for the log file.  Should not contain the filename.
-LOGFILE_FILE="blocklist.log"                             # Filename for the logging.
+LOGFILE_PATH="/var/log/aubs-blocklist-importer/"         # Path for the log file.  Should not contain the filename.
+LOGFILE_FILE="blocklist-importer.log"                    # Filename for the logging.
 
 
 ## Programs used - If needed, set these manually to the required path (e.g. IPTABLES_PATH="/sbin/iptables")
