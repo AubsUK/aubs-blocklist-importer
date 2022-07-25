@@ -57,7 +57,7 @@ sudo nano /etc/crontab
 Add in:
 ```
 # Blocklist Importer
-30 1 * * * root /Path/To/aubs-blocklist-importer/aubs-blocklist-import.sh
+30 1 * * * root /home/aubs/MyScripts/aubs-blocklist-importer/aubs-blocklist-importer.sh
 ```
 **Note:** Make it as frequent as required (within reason, check the blocklist's website to confirm the maximum); You shouldn't use root, so will need to create a user account, allow it to edit the log files and run the script etc.)
 
