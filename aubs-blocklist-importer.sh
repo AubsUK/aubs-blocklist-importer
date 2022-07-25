@@ -2,7 +2,7 @@
 
 ############################################################
 ############################################################
-### V1.1.3 Import Blocklist Files to IPTables
+### V1.1.2 Import Blocklist Files to IPTables
 ### Changes
 ##    v0.1.0 - 2022-07-24 Initial Release
 ##    v0.1.1 - 2022-07-24 minor aesthetic changes
