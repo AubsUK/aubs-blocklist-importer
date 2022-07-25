@@ -326,3 +326,8 @@
   5. Check if BASE_PATH is a valid and/or a 'bad' path like in /proc/ or something
   6. --DONE-- ~~Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line~~
   7. Consider removing the variables for the programs being used, I don't really think these are necessary because the ones being used are mostly 'standard' - Check if they are POSIX, or alternatives.  Most others being used are: date, touch, echo, if, exit, rm, mv, cp, wc, sed, comm, cat.
+
+
+
+# NOTES
+This script was born through the need for a script to do exactly what I wanted.  I took a lot of inspiration from [Lexo.ch](https://www.lexo.ch/blog/2019/09/blocklist-de-iptables-ipset-update-script-how-to-automatically-update-your-firewall-with-the-ip-set-from-blocklist-de/), and lots of support from [Stack Overflow](https://stackoverflow.com/) and related sites, along with may other sites.
