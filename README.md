@@ -342,6 +342,19 @@ aubs-blocklist.log
 
 
 
+# Testing
+The script contains two useful test lines when the script goes through the validation checks.
+<br><br>
+The first pretends the filtered download list `$Blocklist_File` has 5 lines less than it should, so when the imported list doesn't match the filtered download list, it'll try and restore the last known good list (line 449):
+```
+#sed -i '1,5d' $BLOCKLIST_FILE #TESTING1 == REMOVE THE FIRST FIVE LINES FROM THE FILTERED ORIGINAL FILE
+```
+And the second is used after the first validation check fails, which then pretends the second validation check of the last known good list `$BLOCKLIST_EXISTING` has 5 lines less than it should, so when the last known good list doesn't match the last known good import validation, it'll output that it's all failed (line 495):
+```
+#	sed -i '1,5d' $BLOCKLIST_EXISTING #TESTING2 == REMOVE THE FIRST FIVE LINES FROM THE ORIGINAL EXISTING FILE
+```
+
+
 # Planned changes (in no particular order)
 |[Back to top](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)|<br/><br/>
 1. Allow cron to take the download file and chain name as variables
@@ -362,6 +375,45 @@ aubs-blocklist.log
 10. Using the same chain with multiple blocklists (perhaps download all at once, then filter through before adding - Size limitations?).
 11. --DONE-- ~~Check import was successful~~
 12. Warn if any 'override allow' exist in the blocklist
+
+
+
+
+# Example Outputs
+A successful manual run would look like this:
+```
+me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh                                                                                                             [sudo] password for aubs:
+Tue 26 Jul 22:39:42 BST 2022:  ================================================================================
+Tue 26 Jul 22:39:42 BST 2022:
+Tue 26 Jul 22:39:42 BST 2022:  Using Base Path [ /path/to/MyScripts/aubs-blocklist-importer/ ]
+Tue 26 Jul 22:39:42 BST 2022:  Deleting any existing blocklist files. (/path/to/MyScripts/aubs-blocklist-importer/ip-blocklist.*)
+Tue 26 Jul 22:39:42 BST 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20127]
+Tue 26 Jul 22:39:43 BST 2022:
+Tue 26 Jul 22:39:43 BST 2022:  Filter out anything not an IPv4 address [20051]
+Tue 26 Jul 22:39:43 BST 2022:  Removing duplicate IPs. [20051]
+Tue 26 Jul 22:39:43 BST 2022:  Removing Override allow-list IPs (3 unique) [20051]
+Tue 26 Jul 22:39:43 BST 2022:  Adding Override block-list IPs...  (1 unique) [20052]
+Tue 26 Jul 22:39:43 BST 2022:
+Tue 26 Jul 22:39:43 BST 2022:  Checking the configuration for 'blocklist-de'...
+Tue 26 Jul 22:39:43 BST 2022:      IP set already exists
+Tue 26 Jul 22:39:43 BST 2022:      Chain already exists
+Tue 26 Jul 22:39:43 BST 2022:      Chain already in INPUT
+Tue 26 Jul 22:39:43 BST 2022:      Firewall rule already exists in the chain
+Tue 26 Jul 22:39:43 BST 2022:
+Tue 26 Jul 22:39:43 BST 2022:  Getting the existing list for the 'blocklist-de' IP set
+Tue 26 Jul 22:39:43 BST 2022:
+Tue 26 Jul 22:39:43 BST 2022:  Comparing the New and Existing lists...
+Tue 26 Jul 22:39:43 BST 2022:  Adding [2211] new IPs into the IP set... Done
+Tue 26 Jul 22:39:45 BST 2022:  Removing [2866] old IPs from the IP set... Done
+Tue 26 Jul 22:39:48 BST 2022:
+Tue 26 Jul 22:39:48 BST 2022:  Checking imported 'blocklist-de' matches downloaded list... Filtered Download [20052] - Filtered Existing [20052]... Validated
+Tue 26 Jul 22:39:48 BST 2022:
+Tue 26 Jul 22:39:48 BST 2022:  Process finished in 0 Minutes and 6 Seconds.
+Tue 26 Jul 22:39:48 BST 2022:
+Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
+```
+
+
 
 
 
