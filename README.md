@@ -57,7 +57,7 @@ sudo nano /etc/crontab
 Add in:
 ```
 # Blocklist Importer
-30 1 * * * root /home/aubs/MyScripts/aubs-blocklist-importer/aubs-blocklist-importer.sh
+30 1 * * * root /path/to/MyScripts/aubs-blocklist-importer/aubs-blocklist-importer.sh
 ```
 **Note:** Make it as frequent as required (within reason, check the blocklist's website to confirm the maximum); You shouldn't use root, so will need to create a user account, allow it to edit the log files and run the script etc.)
 
@@ -413,7 +413,104 @@ Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
 ```
 
+An unsuccessful manual run would look like this:
+```
+me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
+Tue 26 Jul 23:25:25 BST 2022:  ================================================================================
+Tue 26 Jul 23:25:25 BST 2022:
+Tue 26 Jul 23:25:25 BST 2022:  Using Base Path [ /path/to/MyScripts/aubs-blocklist-importer/ ]
+Tue 26 Jul 23:25:25 BST 2022:  Deleting any existing blocklist files. (/path/to/MyScripts/aubs-blocklist-importer/ip-blocklist.*)
+Tue 26 Jul 23:25:25 BST 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20141]
+Tue 26 Jul 23:25:26 BST 2022:
+Tue 26 Jul 23:25:26 BST 2022:  Filter out anything not an IPv4 address [20067]
+Tue 26 Jul 23:25:26 BST 2022:  Removing duplicate IPs. [20067]
+Tue 26 Jul 23:25:26 BST 2022:  Removing Override allow-list IPs (3 unique) [20067]
+Tue 26 Jul 23:25:26 BST 2022:  Adding Override block-list IPs...  (1 unique) [20068]
+Tue 26 Jul 23:25:26 BST 2022:
+Tue 26 Jul 23:25:26 BST 2022:  Checking the configuration for 'blocklist-de'...
+Tue 26 Jul 23:25:26 BST 2022:      IP set already exists
+Tue 26 Jul 23:25:26 BST 2022:      Chain already exists
+Tue 26 Jul 23:25:26 BST 2022:      Chain already in INPUT
+Tue 26 Jul 23:25:26 BST 2022:      Firewall rule already exists in the chain
+Tue 26 Jul 23:25:26 BST 2022:
+Tue 26 Jul 23:25:26 BST 2022:  Getting the existing list for the 'blocklist-de' IP set
+Tue 26 Jul 23:25:26 BST 2022:
+Tue 26 Jul 23:25:26 BST 2022:  Comparing the New and Existing lists...
+Tue 26 Jul 23:25:26 BST 2022:  Adding [68] new IPs into the IP set... Done
+Tue 26 Jul 23:25:26 BST 2022:  Removing [52] old IPs from the IP set... Done
+Tue 26 Jul 23:25:26 BST 2022:
+Tue 26 Jul 23:25:26 BST 2022:  Checking imported 'blocklist-de' matches downloaded list... Filtered Download [20063] - Filtered Existing [20068]... ERROR !!! - They don't match
+Tue 26 Jul 23:25:26 BST 2022:  An error occurred with importing the download
+Tue 26 Jul 23:25:26 BST 2022:
+Tue 26 Jul 23:25:26 BST 2022:  Resetting the chain
+Tue 26 Jul 23:25:26 BST 2022:      Flushed IPTable Chain
+Tue 26 Jul 23:25:26 BST 2022:      Flushed IPSet Chain
+Tue 26 Jul 23:25:26 BST 2022:      Destroyed IPSet Chain
+Tue 26 Jul 23:25:26 BST 2022:      Deleted IPTable INPUT Join
+Tue 26 Jul 23:25:26 BST 2022:      Deleted IPTable Chain
+Tue 26 Jul 23:25:26 BST 2022:  Creating a new chain
+Tue 26 Jul 23:25:26 BST 2022:      New IP set created
+Tue 26 Jul 23:25:26 BST 2022:      New chain created
+Tue 26 Jul 23:25:26 BST 2022:      Chain added to INPUT
+Tue 26 Jul 23:25:26 BST 2022:      Firewall rule created
+Tue 26 Jul 23:25:26 BST 2022:
+Tue 26 Jul 23:25:26 BST 2022:  Importing the previous existing list... Done
+Tue 26 Jul 23:25:48 BST 2022:  Re-checking restored 'blocklist-de' version matches original existing... Original [20052] - Current [20052]... Validated
+Tue 26 Jul 23:25:48 BST 2022:
+Tue 26 Jul 23:25:48 BST 2022:  Process finished in 0 Minutes and 23 Seconds.
+Tue 26 Jul 23:25:48 BST 2022:
+Tue 26 Jul 23:25:48 BST 2022:  ================================================================================
+```
 
+A compleate failure manual run would look like this:
+```
+me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
+Tue 26 Jul 23:28:16 BST 2022:  ================================================================================
+Tue 26 Jul 23:28:16 BST 2022:
+Tue 26 Jul 23:28:16 BST 2022:  Using Base Path [ /path/to/MyScripts/aubs-blocklist-importer/ ]
+Tue 26 Jul 23:28:16 BST 2022:  Deleting any existing blocklist files. (/path/to/MyScripts/aubs-blocklist-importer/ip-blocklist.*)
+Tue 26 Jul 23:28:16 BST 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20141]
+Tue 26 Jul 23:28:16 BST 2022:
+Tue 26 Jul 23:28:16 BST 2022:  Filter out anything not an IPv4 address [20067]
+Tue 26 Jul 23:28:16 BST 2022:  Removing duplicate IPs. [20067]
+Tue 26 Jul 23:28:16 BST 2022:  Removing Override allow-list IPs (3 unique) [20067]
+Tue 26 Jul 23:28:16 BST 2022:  Adding Override block-list IPs...  (1 unique) [20068]
+Tue 26 Jul 23:28:17 BST 2022:
+Tue 26 Jul 23:28:17 BST 2022:  Checking the configuration for 'blocklist-de'...
+Tue 26 Jul 23:28:17 BST 2022:      IP set already exists
+Tue 26 Jul 23:28:17 BST 2022:      Chain already exists
+Tue 26 Jul 23:28:17 BST 2022:      Chain already in INPUT
+Tue 26 Jul 23:28:17 BST 2022:      Firewall rule already exists in the chain
+Tue 26 Jul 23:28:17 BST 2022:
+Tue 26 Jul 23:28:17 BST 2022:  Getting the existing list for the 'blocklist-de' IP set
+Tue 26 Jul 23:28:17 BST 2022:
+Tue 26 Jul 23:28:17 BST 2022:  Comparing the New and Existing lists...
+Tue 26 Jul 23:28:17 BST 2022:  Adding [68] new IPs into the IP set... Done
+Tue 26 Jul 23:28:17 BST 2022:  Removing [52] old IPs from the IP set... Done
+Tue 26 Jul 23:28:17 BST 2022:
+Tue 26 Jul 23:28:17 BST 2022:  Checking imported 'blocklist-de' matches downloaded list... Filtered Download [20063] - Filtered Existing [20068]... ERROR !!! - They don't match
+Tue 26 Jul 23:28:17 BST 2022:  An error occurred with importing the download
+Tue 26 Jul 23:28:17 BST 2022:
+Tue 26 Jul 23:28:17 BST 2022:  Resetting the chain
+Tue 26 Jul 23:28:17 BST 2022:      Flushed IPTable Chain
+Tue 26 Jul 23:28:17 BST 2022:      Flushed IPSet Chain
+Tue 26 Jul 23:28:17 BST 2022:      Destroyed IPSet Chain
+Tue 26 Jul 23:28:17 BST 2022:      Deleted IPTable INPUT Join
+Tue 26 Jul 23:28:17 BST 2022:      Deleted IPTable Chain
+Tue 26 Jul 23:28:17 BST 2022:  Creating a new chain
+Tue 26 Jul 23:28:17 BST 2022:      New IP set created
+Tue 26 Jul 23:28:17 BST 2022:      New chain created
+Tue 26 Jul 23:28:17 BST 2022:      Chain added to INPUT
+Tue 26 Jul 23:28:17 BST 2022:      Firewall rule created
+Tue 26 Jul 23:28:17 BST 2022:
+Tue 26 Jul 23:28:17 BST 2022:  Importing the previous existing list... Done
+Tue 26 Jul 23:28:39 BST 2022:  Re-checking restored 'blocklist-de' version matches original existing... Original [20047] - Current [20052]... ERROR !!! - Still an issue
+Tue 26 Jul 23:28:39 BST 2022:
+Tue 26 Jul 23:28:39 BST 2022:  Process finished in 0 Minutes and 23 Seconds.
+Tue 26 Jul 23:28:39 BST 2022:
+Tue 26 Jul 23:28:39 BST 2022:  ================================================================================
+
+```
 
 
 
