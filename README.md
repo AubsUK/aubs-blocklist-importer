@@ -382,6 +382,12 @@ And the second is used after the first validation check fails, which then preten
 
 # Example outputs
 A successful manual run would look like this:
+- The original download contained [20127] rows; filtering out 76 rows not IPv4 [20051]; no duplicate IPs found (still [20051]).
+- 3 unique Override Allow IPs weren't in the list, so none to remove (still [20051]); 1 unique Override Block IP present to add (took it up to [20052]).
+- All the IPtables / IPsets configs exist, nothing new to do.
+- Exported the existing list and compared it; only added [2211] IPs and rmeoved [2866].
+- Exported the new existing list [20052]; compared it to the expected filtered download list [20052]; confirmed both match
+- Finished in 6 seconds.
 ```
 me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh                                                                                                             [sudo] password for aubs:
 Tue 26 Jul 22:39:42 BST 2022:  ================================================================================
@@ -414,7 +420,11 @@ Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
 ```
 
-An unsuccessful manual run would look like this:
+An unsuccessful manual run, with a successful restore would look like this:
+- Pretty similar to the successful run.
+- Testing removed 5 IPs from the filtered download [20068] --> [20063]; doesn't match the live list [20063].
+- Rebuilds IPtable and IPset config for the chain.
+- Imports the list and confirms it matches the last known good.
 ```
 me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
 Tue 26 Jul 23:25:25 BST 2022:  ================================================================================
@@ -463,7 +473,15 @@ Tue 26 Jul 23:25:48 BST 2022:
 Tue 26 Jul 23:25:48 BST 2022:  ================================================================================
 ```
 
-A compleate failure manual run would look like this:
+A compleate failure manual run would look like this<br/>
+- As with the unsuccessful run, the download import failed.  This time, the restore also fails.
+- Testing removed 5 IPs from the filtered download [20068] --> [20063]; doesn't match the live list [20063].
+- Rebuilds IPtable and IPset config for the chain.
+- Imports the last known good list
+- Testing removes 5 IPs from the last known good after importing [20052] --> [20047]; fails to match the live list [20052].
+- 
+- Not much can be done now, the IPset will contain what it has, but may need manual intervention.
+- The next automatic run may change this.
 ```
 me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
 Tue 26 Jul 23:28:16 BST 2022:  ================================================================================
