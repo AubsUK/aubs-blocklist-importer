@@ -419,8 +419,7 @@ Tue 26 Jul 22:39:48 BST 2022:  Process finished in 0 Minutes and 6 Seconds.
 Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
 ```
-![Successful Email](https://i.postimg.cc/D8V6CB28/Successful.png)
-
+![Successful Email](https://i.postimg.cc/wTMrjGZc/Successful.png)
 
 
 An unsuccessful manual run, with a successful restore would look like this:
@@ -475,7 +474,7 @@ Tue 26 Jul 23:25:48 BST 2022:  Process finished in 0 Minutes and 23 Seconds.
 Tue 26 Jul 23:25:48 BST 2022:
 Tue 26 Jul 23:25:48 BST 2022:  ================================================================================
 ```
-![Failure Email](https://i.postimg.cc/kBxcLK4w/Failure.png)
+![Failure Email](https://i.postimg.cc/bN5BDRjX/Failure.png)
 
 
 A compleate failure manual run would look like this<br/>
@@ -534,7 +533,7 @@ Tue 26 Jul 23:28:39 BST 2022:
 Tue 26 Jul 23:28:39 BST 2022:  ================================================================================
 
 ```
-![Critical Email](https://i.postimg.cc/WtqS6QcB/Critical.png)
+![Critical Email](https://i.postimg.cc/CMmtYgPx/Critical.png)
 
 
 # Notes
