@@ -9,6 +9,7 @@
 [Quick Start](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#quick-start)<br/>
 [Configurable Options](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#configurable-options)<br/>
 [Planned changes](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#planned-changes-in-no-particular-order)<br/>
+[Example outputs](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#example-outputs)<br/>
 [Notes](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#notes)<br/>
 
 
@@ -379,7 +380,7 @@ And the second is used after the first validation check fails, which then preten
 
 
 
-# Example Outputs
+# Example outputs
 A successful manual run would look like this:
 ```
 me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh                                                                                                             [sudo] password for aubs:
