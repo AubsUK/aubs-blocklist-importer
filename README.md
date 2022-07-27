@@ -479,9 +479,8 @@ A compleate failure manual run would look like this<br/>
 - Rebuilds IPtable and IPset config for the chain.
 - Imports the last known good list
 - Testing removes 5 IPs from the last known good after importing [20052] --> [20047]; fails to match the live list [20052].
-- 
 - Not much can be done now, the IPset will contain what it has, but may need manual intervention.
-- The next automatic run may change this.
+- The next automatic run may correct this.
 ```
 me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
 Tue 26 Jul 23:28:16 BST 2022:  ================================================================================
