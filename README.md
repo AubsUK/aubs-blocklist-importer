@@ -12,6 +12,7 @@
 [Example outputs](#example-outputs)<br/>
 [Notes](#notes)<br/>
 
+<br/><br/>
 
 
 # Information
@@ -34,6 +35,7 @@ This is a simple blocklist import script that works with single IPv4 addresses (
 - Full logging
 - Email notifications
 
+<br/><br/>
 
 
 # Quick Start
@@ -61,6 +63,8 @@ Add in:
 30 1 * * * root /path/to/MyScripts/aubs-blocklist-importer/aubs-blocklist-importer.sh
 ```
 **Note:** Make it as frequent as required (within reason, check the blocklist's website to confirm the maximum); You shouldn't use root, so will need to create a user account, allow it to edit the log files and run the script etc.)
+
+<br/><br/>
 
 
 # Configurable Options
@@ -340,7 +344,7 @@ aubs-blocklist.log
 </tr>
 </table>
 
-
+<br/><br/>
 
 
 # Testing
@@ -355,6 +359,8 @@ And the second is used after the first validation check fails, which then preten
 ```
 #	sed -i '1,5d' $BLOCKLIST_EXISTING #TESTING2 == REMOVE THE FIRST FIVE LINES FROM THE ORIGINAL EXISTING FILE
 ```
+
+<br/><br/>
 
 
 # Planned changes (in no particular order)
@@ -378,12 +384,13 @@ And the second is used after the first validation check fails, which then preten
 11. --DONE-- ~~Check import was successful~~
 12. Warn if any 'override allow' exist in the blocklist
 
-
+<br/><br/>
 
 
 # Example outputs
 |[Back to top](#aubs-blocklist-importer)|<br/><br/>
-A successful manual run would look like this:
+<br/>
+## Successful manual run
 - The original download contained [20127] rows; filtering out 76 rows not IPv4 [20051]; no duplicate IPs found (still [20051]).
 - 3 unique Override Allow IPs weren't in the list, so none to remove (still [20051]); 1 unique Override Block IP present to add (took it up to [20052]).
 - All the IPtables / IPsets configs exist, nothing new to do.
@@ -421,10 +428,11 @@ Tue 26 Jul 22:39:48 BST 2022:  Process finished in 0 Minutes and 6 Seconds.
 Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
 ```
-![Successful Email](https://i.postimg.cc/wTMrjGZc/Successful.png)
+![Successful Email](https://i.postimg.cc/YS8gW0w7/Successful.pngg)
 
+<br/><br/>
 
-An unsuccessful manual run, with a successful restore would look like this:
+## Unsuccessful manual run (with successful restore)
 - Pretty similar to the successful run.
 - Testing removed 5 IPs from the filtered download [20068] --> [20063]; doesn't match the live list [20063].
 - Rebuilds IPtable and IPset config for the chain.
@@ -476,10 +484,11 @@ Tue 26 Jul 23:25:48 BST 2022:  Process finished in 0 Minutes and 23 Seconds.
 Tue 26 Jul 23:25:48 BST 2022:
 Tue 26 Jul 23:25:48 BST 2022:  ================================================================================
 ```
-![Failure Email](https://i.postimg.cc/bN5BDRjX/Failure.png)
+![Failure Email](https://i.postimg.cc/wvvNcz6m/Failure.png)
 
+<br/><br/>
 
-A compleate failure manual run would look like this<br/>
+## Unsuccessful manual run (with unssuccessful restore - Complete Failure)
 - As with the unsuccessful run, the download import failed.  This time, the restore also fails.
 - Testing removed 5 IPs from the filtered download [20068] --> [20063]; doesn't match the live list [20063].
 - Rebuilds IPtable and IPset config for the chain.
@@ -535,7 +544,9 @@ Tue 26 Jul 23:28:39 BST 2022:
 Tue 26 Jul 23:28:39 BST 2022:  ================================================================================
 
 ```
-![Critical Email](https://i.postimg.cc/CMmtYgPx/Critical.png)
+![Critical Email](https://i.postimg.cc/63mvMP31/Critical.png)
+
+<br/><br/>
 
 
 # Notes
