@@ -4,18 +4,18 @@
 
 
 # Contents
-[Top of Page](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)<br/>
-[Information](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#information)<br/>
-[Quick Start](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#quick-start)<br/>
-[Configurable Options](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#configurable-options)<br/>
-[Planned changes](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#planned-changes-in-no-particular-order)<br/>
-[Example outputs](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#example-outputs)<br/>
-[Notes](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#notes)<br/>
+[Top of Page](#aubs-blocklist-importer)<br/>
+[Information](#information)<br/>
+[Quick Start](#quick-start)<br/>
+[Configurable Options](#configurable-options)<br/>
+[Planned changes](#planned-changes-in-no-particular-order)<br/>
+[Example outputs](#example-outputs)<br/>
+[Notes](#notes)<br/>
 
 
 
 # Information
-|[Back to top](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)|<br/><br/>
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
 This is a simple blocklist import script that works with single IPv4 addresses (no ranges or IPv6 support yet).
 - Runs automatically (via Cron)
 - Imports a list of IPs to block from a URL text file
@@ -37,7 +37,7 @@ This is a simple blocklist import script that works with single IPv4 addresses (
 
 
 # Quick Start
-|[Back to top](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)|<br/><br/>
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
 Clone the repository
 ```
 git clone https://github.com/AubsUK/aubs-blocklist-importer
@@ -65,7 +65,7 @@ Add in:
 
 # Configurable Options
 
-|[Back to top](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)|<br/><br/>
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
 <table>
 <tr><th>Variable</th><th>Description</th><th>Default</th></tr>
 <tr>
@@ -344,6 +344,7 @@ aubs-blocklist.log
 
 
 # Testing
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
 The script contains two useful test lines when the script goes through the validation checks.
 <br><br>
 The first pretends the filtered download list `$Blocklist_File` has 5 lines less than it should, so when the imported list doesn't match the filtered download list, it'll try and restore the last known good list (line 449):
@@ -357,7 +358,7 @@ And the second is used after the first validation check fails, which then preten
 
 
 # Planned changes (in no particular order)
-|[Back to top](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)|<br/><br/>
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
 1. Allow cron to take the download file and chain name as variables
 2. Incorporate IPv6 IP addresses
 3. If a firewall rule exists in the chain, check if the ACTION is the same each time and change if it's different e.g. DROP to REJECT
@@ -381,6 +382,7 @@ And the second is used after the first validation check fails, which then preten
 
 
 # Example outputs
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
 A successful manual run would look like this:
 - The original download contained [20127] rows; filtering out 76 rows not IPv4 [20051]; no duplicate IPs found (still [20051]).
 - 3 unique Override Allow IPs weren't in the list, so none to remove (still [20051]); 1 unique Override Block IP present to add (took it up to [20052]).
@@ -537,5 +539,5 @@ Tue 26 Jul 23:28:39 BST 2022:  =================================================
 
 
 # Notes
-|[Back to top](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/README.md#aubs-blocklist-importer)|<br/><br/>
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
 This script was born through the need for a script to do exactly what I wanted.  I took a lot of inspiration from [Lexo.ch](https://www.lexo.ch/blog/2019/09/blocklist-de-iptables-ipset-update-script-how-to-automatically-update-your-firewall-with-the-ip-set-from-blocklist-de/), and lots of support from [Stack Overflow](https://stackoverflow.com/) and related sites, along with may other sites.
