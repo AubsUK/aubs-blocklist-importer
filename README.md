@@ -398,7 +398,7 @@ And the second is used after the first validation check fails, which then preten
 - Exported the new existing list [20052]; compared it to the expected filtered download list [20052]; confirmed both match
 - Finished in 6 seconds.
 ```
-me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh                                                                                                             [sudo] password for aubs:
+me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
 Tue 26 Jul 22:39:42 BST 2022:  ================================================================================
 Tue 26 Jul 22:39:42 BST 2022:
 Tue 26 Jul 22:39:42 BST 2022:  Using Base Path [ /path/to/MyScripts/aubs-blocklist-importer/ ]
