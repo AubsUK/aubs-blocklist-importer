@@ -428,7 +428,7 @@ Tue 26 Jul 22:39:48 BST 2022:  Process finished in 0 Minutes and 6 Seconds.
 Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
 ```
-![Successful Email](https://i.postimg.cc/YS8gW0w7/Successful.pngg)
+![Successful Email](https://raw.githubusercontent.com/AubsUK/aubs-blocklist-importer/main/Example-Email-Successful.png)
 
 <br/><br/>
 
@@ -484,7 +484,7 @@ Tue 26 Jul 23:25:48 BST 2022:  Process finished in 0 Minutes and 23 Seconds.
 Tue 26 Jul 23:25:48 BST 2022:
 Tue 26 Jul 23:25:48 BST 2022:  ================================================================================
 ```
-![Failure Email](https://i.postimg.cc/wvvNcz6m/Failure.png)
+![Failure Email](https://raw.githubusercontent.com/AubsUK/aubs-blocklist-importer/main/Example-Email-Failure.png)
 
 <br/><br/>
 
@@ -544,7 +544,7 @@ Tue 26 Jul 23:28:39 BST 2022:
 Tue 26 Jul 23:28:39 BST 2022:  ================================================================================
 
 ```
-![Critical Email](https://i.postimg.cc/63mvMP31/Critical.png)
+![Critical Email](https://raw.githubusercontent.com/AubsUK/aubs-blocklist-importer/main/Example-Email-Critical.png)
 
 <br/><br/>
 
