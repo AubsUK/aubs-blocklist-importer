@@ -7,19 +7,18 @@
 ### Changes
 ##	v0.1.0 - 2022-07-24 Initial Release
 ##	v0.1.1 - 2022-07-24 minor aesthetic changes
-##		  Removed header information from this file and added to README
-##		  Added $CHAINNAME to success email
-##		  Reformatted failure email
+##		Removed header information from this file and added to README
+##		Added $CHAINNAME to success email
+##		Reformatted failure email
 ##	v0.1.2 - 2022-07-24 Override files change
-##		  Changed the way overrides are processed if the file doesn't exist.
+##		Changed the way overrides are processed if the file doesn't exist.
 ##	v0.1.3 - 2022-07-25 Changed logfile location
 ##	v0.2.0 - 2022-07-25 Added a check to make sure it's all worked
-##		  After importing, check download and live lists match;
+##		After importing, check download and live lists match;
 ##			If check fails, try and restore the previously loaded list, check again
-##		  Modified final email notification to include success/failure if restoring
-##		  Changed logfile name
-##		  Moved clear/check/create IPTables configuration
-##	v0.2.1 - 2022-11-21 Fixed checking for packages used where the package doesn't exist
+##		Modified final email notification to include success/failure if restoring
+##		Changed logfile name
+##		Moved clear/check/create IPTables configuration
 ##
 ############################################################
 ############################################################
@@ -56,7 +55,7 @@ LOGFILE_PATH="/var/log/aubs-blocklist-importer/"         # Path for the log file
 LOGFILE_FILE="aubs-blocklist-importer.log"               # Filename for the logging.
 
 
-## Packages used - If needed, set these manually to the required path (e.g. IPTABLES_PATH="/sbin/iptables")
+## Programs used - If needed, set these manually to the required path (e.g. IPTABLES_PATH="/sbin/iptables")
 IPTABLES_PATH="$(which iptables)"
 IPSET_PATH="$(which ipset)"
 SORT_PATH="$(which sort)"
@@ -236,13 +235,13 @@ LogThis ""
 if [ "$BASE_PATH" != "" ] && [ "${BASE_PATH:0:1}" == "/" ] && [ -d "$BASE_PATH" ]; then LogThis "Using Base Path [ $BASE_PATH ]"; fi;
 
 ## Check the commands used are valid, otherwise we might run into ussues
-if [[ `command -v $IPTABLES_PATH` == "" ]]; then LogThis "Cannot find [ IPTABLES_PATH ]. Is it installed? Exiting"; exit 1; fi;
-if [[ `command -v $IPSET_PATH` == "" ]]; then LogThis "Cannot find [ IPSET_PATH ]. Is it installed? Exiting"; exit 1; fi;
-if [[ `command -v $SORT_PATH` == "" ]]; then LogThis "Cannot find [ SORT_PATH ]. Is it installed? Exiting"; exit 1; fi;
-if [[ `command -v $SENDMAIL_PATH` == "" ]]; then LogThis "Cannot find [ SENDMAIL_PATH ]. Is it installed? Exiting"; exit 1; fi;
-if [[ `command -v $GREP_PATH` == "" ]]; then LogThis "Cannot find [ GREP_PATH ]. Is it installed? Exiting"; exit 1; fi;
-if [[ `command -v $WGET_PATH` == "" ]]; then LogThis "Cannot find [ WGET_PATH ]. Is it installed? Exiting"; exit 1; fi;
-if [[ `command -v $PERL_PATH` == "" ]]; then LogThis "Cannot find [ PERL_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [ `command -v $IPTABLES_PATH` == "" ]; then LogThis "Cannot find [ $IPTABLES_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [ `command -v $IPSET_PATH` == "" ]; then LogThis "Cannot find [ $IPSET_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [ `command -v $SORT_PATH` == "" ]; then LogThis "Cannot find [ $SORT_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [ `command -v $SENDMAIL_PATH` == "" ]; then LogThis "Cannot find [ $SENDMAIL_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [ `command -v $GREP_PATH` == "" ]; then LogThis "Cannot find [ $GREP_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [ `command -v $WGET_PATH` == "" ]; then LogThis "Cannot find [ $WGET_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [ `command -v $PERL_PATH` == "" ]; then LogThis "Cannot find [ $PERL_PATH ]. Is it installed? Exiting"; exit 1; fi;
 
 ## ========== ========== ========== ========== ========== ##
 
