@@ -365,24 +365,26 @@ And the second is used after the first validation check fails, which then preten
 
 # Planned changes (in no particular order)
 |[Back to top](#aubs-blocklist-importer)|<br/><br/>
-1. Allow cron to take the download file and chain name as variables
-2. Incorporate IPv6 IP addresses
-3. If a firewall rule exists in the chain, check if the ACTION is the same each time and change if it's different e.g. DROP to REJECT
-4. Check if the path is a path or a file/path for all variables
+1. Allow cron to take the download file URL and chain name as variables, so multiple can be run from one script
+2. Using the same chain with multiple blocklists (perhaps download all at once, then filter through before adding - Size limitations?).
+3. Incorporate IPv6 IP addresses
+4. If a firewall rule exists in the chain, check if the ACTION is the same each time and change if it's different e.g. DROP to REJECT
+5. Check if the path is a path or a file/path for all variables
 ```
   BASE_PATH_CheckPath=${BASE_PATH%/*}
   BASE_PATH_CheckFile=${BASE_PATH##*/}
   echo "PATH [ $BASE_PATH_CheckPath ]"
   echo "FILE [ $BASE_PATH_CheckFile ]"
 ```
-5. Check if BASE_PATH is a valid and/or a 'bad' path like in /proc/ or something
-6. --DONE-- ~~Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line~~
-7. Consider removing the variables for the programs being used, I don't really think these are necessary because the ones being used are mostly 'standard' - Check if they are POSIX, or alternatives.  Most others being used are: date, touch, echo, if, exit, rm, mv, cp, wc, sed, comm, cat.
-8. Work with subnets, expand them to individual IPs or if IPSet allows them.
-9. Enable/Disable email notifications, or set them to only send every X days.
-10. Using the same chain with multiple blocklists (perhaps download all at once, then filter through before adding - Size limitations?).
+6. Check if BASE_PATH is a valid and/or a 'bad' path like in /proc/ or something
+7. --DONE-- ~~Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line~~
+8. Consider removing the variables for the programs being used, I don't really think these are necessary because the ones being used are mostly 'standard' - Check if they are POSIX, or alternatives.  Most others being used are: date, touch, echo, if, exit, rm, mv, cp, wc, sed, comm, cat. [ipset was not on some of my servers]
+9. Work with subnets, expand them to individual IPs or if IPSet allows them.
+10. Enable/Disable email notifications, or set them to only send every X days.
 11. --DONE-- ~~Check import was successful~~
 12. Warn if any 'override allow' exist in the blocklist
+13. Allow use of list from a local file (e.g. manual syncing)
+
 
 <br/><br/>
 
