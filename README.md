@@ -377,14 +377,14 @@ And the second is used after the first validation check fails, which then preten
   echo "FILE [ $BASE_PATH_CheckFile ]"
 ```
 6. Check if BASE_PATH is a valid and/or a 'bad' path like in /proc/ or something
-7. --DONE-- ~~Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line~~
+7. --DONE-- ~~Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line)~~
 8. Consider removing the variables for the programs being used, I don't really think these are necessary because the ones being used are mostly 'standard' - Check if they are POSIX, or alternatives.  Most others being used are: date, touch, echo, if, exit, rm, mv, cp, wc, sed, comm, cat. [ipset was not on some of my servers]
 9. Work with subnets, expand them to individual IPs or if IPSet allows them.
 10. Enable/Disable email notifications, or set them to only send every X days.
 11. --DONE-- ~~Check import was successful~~
 12. Warn if any 'override allow' exist in the blocklist
 13. Allow use of list from a local file (e.g. manual syncing)
-
+14. --DONE-- ~~Don't import if downloaded file contains less than a defined number of rows~~
 
 <br/><br/>
 
