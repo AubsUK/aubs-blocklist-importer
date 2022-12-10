@@ -20,6 +20,7 @@
 ##		  Changed logfile name
 ##		  Moved clear/check/create IPTables configuration
 ##	v0.2.1 - 2022-11-21 Fixed checking for packages used where the package doesn't exist
+##	v0.2.2 - 2022-12-10 Added MIN_COUNT for the minimum count in downloaded file to prevent failed downloads
 ##
 ############################################################
 ############################################################
@@ -32,7 +33,7 @@ DELETE_ALL_FILES_ON_COMPLETION=true
 DOWNLOAD_FILE="http://lists.blocklist.de/lists/all.txt"  # The text file that contains all the IPs to use
 CHAINNAME="blocklist-de"                                 # The Chain name to import the IPs into
 ACTION="REJECT" # Can be DROP or REJECT                  # The action to assign to the IPs for this Chain
-
+MIN_COUNT="100"                                          # If the downloaded file contains less than this number of rows, consider it failed
 
 ## Base defaults - Set the base path and filename here
 PathOfScript="$(dirname "$(realpath "$0")")/"
@@ -255,7 +256,7 @@ LogThis -s "Downloading the most recent IP list from $DOWNLOAD_FILE..."
 wgetOK=$($WGET_PATH -qO - $DOWNLOAD_FILE > $BLOCKLIST_FILE) 2>&1
 if [ $? -ne 0 ]
 then
-	BodyResponse="IP blocklist could not be downloaded from '$DOWNLOAD_FILE' - The script calling this function: $0"
+	BodyResponse="IP blocklist could not be downloaded from '$DOWNLOAD_FILE' ($0)"
 	LogThis -e " $BodyResponse"
 	## Send warning e-mail and exit
 	SUBJECT+="ERROR - Failed to download the new IP set"
@@ -271,15 +272,41 @@ then
 					<tr><td>Date</td><td>$(date "+%F %T (%Z)")</td></tr>
 					<tr><td>Server</td><td>`uname -a`</td></tr>
 				</table>
-				
 			</body>
 		</html>
 	"
 	SendEmailNow "$SUBJECT" "$BODY"
 	exit 1
 else
-	## Download didn't fail, so should be successful
-	LogThis -e "Successful [$(wc -l < $BLOCKLIST_FILE)]"
+	## Check the count, if it is 0, we shouldn't continue
+
+	if [ $(wc -l < $BLOCKLIST_FILE) -lt $MIN_COUNT ]
+	then
+		BodyResponse="IP blocklist could not be downloaded from '$DOWNLOAD_FILE' [ Downloaded $(wc -l < $BLOCKLIST_FILE), below minimum of $MIN_COUNT]"
+		LogThis -e " $BodyResponse"
+		## Send warning e-mail and exit
+		SUBJECT+="ERROR - Failed to download the new IP set"
+		BODY="
+			<html>
+				<head></head>
+				<body>
+					<b>IP Blocklist script update FAILED:</b>
+					<br/><br/>
+					<table>
+						<tr><td>URL</td><td>$BodyResponse</td></tr>
+						<tr><td>Chain Name</td><td>$CHAINNAME</td></tr>
+						<tr><td>Date</td><td>$(date "+%F %T (%Z)")</td></tr>
+						<tr><td>Server</td><td>`uname -a`</td></tr>
+					</table>
+				</body>
+			</html>
+		"
+		SendEmailNow "$SUBJECT" "$BODY"
+		exit 1
+	else
+		## Download didn't fail, so should be successful
+		LogThis -e "Successful [$(wc -l < $BLOCKLIST_FILE)]"
+	fi
 fi
 
 ## Take a copy of the original download
