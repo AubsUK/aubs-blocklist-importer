@@ -7,20 +7,24 @@
 ### Changes
 ##	v0.1.0 - 2022-07-24 Initial Release
 ##	v0.1.1 - 2022-07-24 minor aesthetic changes
-##		  Removed header information from this file and added to README
-##		  Added $CHAINNAME to success email
-##		  Reformatted failure email
+##			Removed header information from this file and added to README
+##			Added $CHAINNAME to success email
+##			Reformatted failure email
 ##	v0.1.2 - 2022-07-24 Override files change
-##		  Changed the way overrides are processed if the file doesn't exist.
+##			Changed the way overrides are processed if the file doesn't exist.
 ##	v0.1.3 - 2022-07-25 Changed logfile location
 ##	v0.2.0 - 2022-07-25 Added a check to make sure it's all worked
-##		  After importing, check download and live lists match;
-##			If check fails, try and restore the previously loaded list, check again
-##		  Modified final email notification to include success/failure if restoring
-##		  Changed logfile name
-##		  Moved clear/check/create IPTables configuration
+##			After importing, check download and live lists match;
+##			  If check fails, try and restore the previously loaded list, check again
+##			Modified final email notification to include success/failure if restoring
+##			Changed logfile name
+##			Moved clear/check/create IPTables configuration
 ##	v0.2.1 - 2022-11-21 Fixed checking for packages used where the package doesn't exist
 ##	v0.2.2 - 2022-12-10 Added MIN_COUNT for the minimum count in downloaded file to prevent failed downloads
+##	v0.2.3 - 2022-12-11 Added Email Success/Failure switches
+##			Allows failures to be alerted without the constant bombardment of successes
+##			Also allows an override to send one Success/Failure after the opposite is received, even
+##			  if it shouldn't email on those days.
 ##
 ############################################################
 ############################################################
@@ -30,32 +34,46 @@ DELETE_ALL_FILES_ON_COMPLETION=true
 
 
 ## Basic Settings
-DOWNLOAD_FILE="http://lists.blocklist.de/lists/all.txt"  # The text file that contains all the IPs to use
-CHAINNAME="blocklist-de"                                 # The Chain name to import the IPs into
-ACTION="REJECT" # Can be DROP or REJECT                  # The action to assign to the IPs for this Chain
-MIN_COUNT="100"                                          # If the downloaded file contains less than this number of rows, consider it failed
+DOWNLOAD_FILE="http://lists.blocklist.de/lists/all.txt" 	# The text file that contains all the IPs to use
+#DOWNLOAD_FILE="http://aubs.uk/test.txt"	# The text file that contains all the IPs to use
+
+CHAINNAME="blocklist-de"					# The Chain name to import the IPs into
+ACTION="REJECT" # Can be DROP or REJECT				# The action to assign to the IPs for this Chain
+MIN_COUNT="100"							# If the downloaded file contains less than this number of rows, consider it failed
 
 ## Base defaults - Set the base path and filename here
 PathOfScript="$(dirname "$(realpath "$0")")/"
-BASE_PATH="$PathOfScript"                                # The base path for all files
-BLOCKLIST_BASE_FILE="ip-blocklist"                       # The base filename for all files related to the blocklist
+BASE_PATH="$PathOfScript"					# The base path for all files
+BLOCKLIST_BASE_FILE="ip-blocklist"				# The base filename for all files related to the blocklist
 
 
 ## E-Mail variables
-SENDER_NAME="Notifications"                              # Display name for the sending email address
-SENDER_EMAIL="notifications@$(hostname -f)"              # Sending email address ('hostname -f' puts the FQDN)
-RECIPIENT_EMAIL="servers@$(hostname -d)"                 # Comma separated recipient addresses ('hostname -d' puts domain name)
-SUBJECT="$(hostname -f) - IP blocklist update - "        # Subject start for the email.
+SENDER_NAME="Notifications"					# Display name for the sending email address
+SENDER_EMAIL="notifications@$(hostname -f)"			# Sending email address ('hostname -f' puts the FQDN)
+RECIPIENT_EMAIL="servers@$(hostname -d)"			# Comma separated recipient addresses ('hostname -d' puts domain name)
+SUBJECT="$(hostname -f) - IP blocklist update - "		# Subject start for the email.
+EMAIL_SUCCESS_DAYS=1,4						# Days SUCCESS emails should be sent [1=Monday, 7=Sunday] (1,=Mon,Thu)
+EMAIL_SUCCESS_TYPE="FIRST"					# When to send success emails (if run multiple times a day) [NONE, FIRST, ALL] (only on the days in SUCCESS_DAYS)
+EMAIL_FAILURE_DAYS=1,2,3,4,5,6,7				# Days FAILURE emails should be sent [1=Monday, 7=Sunday] (1,3,6=Mon,Wed,Sat)
+EMAIL_FAILURE_TYPE="FIRST"					# When to send failure emails (if run multiple times a day) [NONE, FIRST, ALL]
+EMAIL_FAILURE_SUCCESS_OVERRIDE=true				# For multi-day runs, as long as the FAILURE_DAYS is 1-7 and FAILURE_TYPE isn't NONE, when a FAILURE
+								#   is received after a SUCCESS, an email will be sent (last run=success, this run=failure).
+								#   The same will happen for SUCCESS if SUCCESS_DAYS is 1-7 and SUCCESS_TYPE isn't NONE, that after a
+								#   FAILURE, a SUCCESS email will be received.
+								#   On the other hand, as FAILUREs will be sent, a SUCCESS might not to confirm it has been restored
+								#   until the next SUCCESS_DAY when a SUCCESS can be received.  Set this to true and a FAILURE/SUCCESS
+								#   email will be sent the first time the new status changes, but no other times unless scheduled.
 
 
 ## Permanent Files
-OVERRIDE_ALLOWLIST_PATH=$BASE_PATH                       # Path for the override allow-list (default is the same as the base path)
-OVERRIDE_ALLOWLIST_FILE="override-allowlist.txt"         # Override allow-list filename
-OVERRIDE_BLOCKLIST_PATH=$BASE_PATH                       # Path for the override block-list (default is the same as the base path)
-OVERRIDE_BLOCKLIST_FILE="override-blocklist.txt"         # Override block-list filename
-LOGFILE_PATH="/var/log/aubs-blocklist-importer/"         # Path for the log file.  Should not contain the filename.
-LOGFILE_FILE="aubs-blocklist-importer.log"               # Filename for the logging.
-
+OVERRIDE_ALLOWLIST_PATH=$BASE_PATH				# Path for the override allow-list (default is the same as the base path)
+OVERRIDE_ALLOWLIST_FILE="override-allowlist.txt"		# Override allow-list filename
+OVERRIDE_BLOCKLIST_PATH=$BASE_PATH				# Path for the override block-list (default is the same as the base path)
+OVERRIDE_BLOCKLIST_FILE="override-blocklist.txt"		# Override block-list filename
+LOGFILE_PATH="/var/log/aubs-blocklist-importer/"		# Path for the log file.  Should not contain the filename.
+LOGFILE_FILE="aubs-blocklist-importer.log"			# Filename for the logging.
+LAST_RUN_PATH=$BASE_PATH					# Status of the last run (includes the day number for use in email allowed days)
+LAST_RUN_FILE="Last_Run_Status.txt"				# Status of the last run (includes the day number for use in email allowed days)
 
 ## Packages used - If needed, set these manually to the required path (e.g. IPTABLES_PATH="/sbin/iptables")
 IPTABLES_PATH="$(which iptables)"
@@ -84,29 +102,31 @@ OVERRIDE_BLOCKLIST=$OVERRIDE_BLOCKLIST_PATH$OVERRIDE_BLOCKLIST_FILE
 BLOCKLIST_BASE_FILEPATH=$BASE_PATH$BLOCKLIST_BASE_FILE
 
 # Temporary files created based on the base file.  All related files will be created in the same location
-BLOCKLIST_FILE=$BLOCKLIST_BASE_FILEPATH.download                         # Main file that the download list is imported into and processed
-BLOCKLIST_EXISTING=$BLOCKLIST_BASE_FILEPATH.existing                     # List of existing IPs from the current IP chain
-BLOCKLIST_EXISTING_CHECK1=$BLOCKLIST_BASE_FILEPATH.existing.check1       # List of IPs to confirm successful import
-BLOCKLIST_EXISTING_VALIDATE1=$BLOCKLIST_BASE_FILEPATH.existing.validate1 # List of IPs remaining after checking
-BLOCKLIST_EXISTING_CHECK2=$BLOCKLIST_BASE_FILEPATH.existing.check2       # List of IPs to confirm successful import
-BLOCKLIST_EXISTING_VALIDATE2=$BLOCKLIST_BASE_FILEPATH.existing.validate2 # List of IPs remaining after checking
-BLOCKLIST_ORIGINAL=$BLOCKLIST_FILE.Original                              # Copy of the original download file
-BLOCKLIST_IPV4=$BLOCKLIST_FILE.IPv4                                      # Downloaded file processed with only IPv4 addresses
-BLOCKLIST_OVERRIDE_ALLOWLIST=$BLOCKLIST_FILE.OverrideAllow               # Downloaded file processed with override allow-list addresses removed
-BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP=$BLOCKLIST_FILE.OverrideAllowTEMP      # Temporary override allow-list files sorted and deduped
-BLOCKLIST_OVERRIDE_BLOCKLIST=$BLOCKLIST_FILE.OverrideBlock               # Downloaded file processed with override block-list addresses added
-BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP=$BLOCKLIST_FILE.OverrideBlockTEMP      # Temporary override block-list files sorted and deduped
-BLOCKLIST_DEDUPE=$BLOCKLIST_FILE.Dedupe                                  # Downloaded file processed with duplicates removed
-BLOCKLIST_COMPARE=$BLOCKLIST_FILE.compare                                # Comparison between processed download file and existing list
-BLOCKLIST_COMPARE_ADD=$BLOCKLIST_FILE.compare.add                        # Items processed that aren't in the existing (to be added)
-BLOCKLIST_COMPARE_REM=$BLOCKLIST_FILE.compare.rem                        # Existing items that aren't in the processed (to be removed)
-
+BLOCKLIST_FILE=$BLOCKLIST_BASE_FILEPATH.download				# Main file that the download list is imported into and processed
+BLOCKLIST_EXISTING=$BLOCKLIST_BASE_FILEPATH.existing				# List of existing IPs from the current IP chain
+BLOCKLIST_EXISTING_CHECK1=$BLOCKLIST_BASE_FILEPATH.existing.check1		# List of IPs to confirm successful import
+BLOCKLIST_EXISTING_VALIDATE1=$BLOCKLIST_BASE_FILEPATH.existing.validate1	# List of IPs remaining after checking
+BLOCKLIST_EXISTING_CHECK2=$BLOCKLIST_BASE_FILEPATH.existing.check2		# List of IPs to confirm successful import
+BLOCKLIST_EXISTING_VALIDATE2=$BLOCKLIST_BASE_FILEPATH.existing.validate2	# List of IPs remaining after checking
+BLOCKLIST_ORIGINAL=$BLOCKLIST_FILE.Original					# Copy of the original download file
+BLOCKLIST_IPV4=$BLOCKLIST_FILE.IPv4						# Downloaded file processed with only IPv4 addresses
+BLOCKLIST_OVERRIDE_ALLOWLIST=$BLOCKLIST_FILE.OverrideAllow			# Downloaded file processed with override allow-list addresses removed
+BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP=$BLOCKLIST_FILE.OverrideAllowTEMP		# Temporary override allow-list files sorted and deduped
+BLOCKLIST_OVERRIDE_BLOCKLIST=$BLOCKLIST_FILE.OverrideBlock			# Downloaded file processed with override block-list addresses added
+BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP=$BLOCKLIST_FILE.OverrideBlockTEMP		# Temporary override block-list files sorted and deduped
+BLOCKLIST_DEDUPE=$BLOCKLIST_FILE.Dedupe						# Downloaded file processed with duplicates removed
+BLOCKLIST_COMPARE=$BLOCKLIST_FILE.compare					# Comparison between processed download file and existing list
+BLOCKLIST_COMPARE_ADD=$BLOCKLIST_FILE.compare.add				# Items processed that aren't in the existing (to be added)
+BLOCKLIST_COMPARE_REM=$BLOCKLIST_FILE.compare.rem				# Existing items that aren't in the processed (to be removed)
+LAST_RUN_STATUS=$LAST_RUN_PATH$LAST_RUN_FILE					# Last run file, contains SUCCESS or FAILURE and a number for the day last run
 
 ## If the logfile path doesn't exist, make it, then touch the file to create it if needed
 mkdir -p $LOGFILE_PATH
 touch $LOGFILE_LOCATION
 
-
+#If the last run status path doesn't exist, make it, then touch the file to create it if needed
+mkdir -p $LAST_RUN_PATH
+touch $LAST_RUN_STATUS
 
 
 ## Function to log to the log file and output to the screen if run manually
@@ -158,8 +178,82 @@ LogThis() {
 ## Function to send an email
 SendEmailNow()
 {
-	SUBJECT=$1
-	BODY=$2
+	SEND_TODAY=true
+	CURRENT_STATUS=$1
+	SUBJECT=$2
+	BODY=$3
+
+	DOW=$(date +%u)
+	DOW=$(($DOW-0))
+
+#CURRENT_STATUS="SUCCESS"
+
+	LAST_STATUS_READ="`head -1 $LAST_RUN_STATUS`"
+	if [ $LAST_STATUS_READ ]
+	then
+		LAST_DAY="${LAST_STATUS_READ:7}"
+		LAST_STATUS="${LAST_STATUS_READ::-1}"
+	fi
+#Overwrite the LAST_RUN_STATUS file
+	LogThis "Writing last status of [$CURRENT_STATUS$DOW] to $LAST_RUN_STATUS"
+	echo "$CURRENT_STATUS$DOW" > $LAST_RUN_STATUS
+
+echo "CURRENT_STATUS: $CURRENT_STATUS"
+echo "EMAIL_SUCCESS_DAYS: $EMAIL_SUCCESS_DAYS"
+echo "EMAIL_SUCCESS_TYPE: $EMAIL_SUCCESS_TYPE"
+echo "EMAIL_FAILURE_DAYS: $EMAIL_FAILURE_DAYS"
+echo "EMAIL_FAILURE_TYPE: $EMAIL_FAILURE_TYPE"
+echo "LAST_DAY: $LAST_DAY"
+echo "LAST_STATUS: $LAST_STATUS"
+echo "EMAIL_FAILURE_SUCCESS_OVERRIDE: $EMAIL_FAILURE_SUCCESS_OVERRIDE"
+
+echo "----------"
+if [[ $EMAIL_FAILURE_DAYS == *$DOW* ]]; then echo "EMAIL_FAILURE_DAYS matches today"; else echo "EMAIL_FAILURE_DAYS NOT matches today"; fi
+if [[ "$EMAIL_FAILURE_TYPE" == "ALL" ]]; then echo "EMAIL_FAILURE_TYPE matches ALL"; else echo "EMAIL_FAILURE_TYPE NOT matches ALL"; fi
+if [[ $LAST_DAY -ne $DOW ]]; then echo "LAST_DAY NOT matches current day"; else echo "LAST_DAY matches current day"; fi
+if [[ "$EMAIL_FAILURE_TYPE" == "FIRST" ]]; then echo "EMAIL_FAILURE_TYPE matches FIRST"; else echo "EMAIL_FAILURE_TYPE NOT matches FIRST"; fi
+if [[ "$LAST_STATUS" == "SUCCESS" ]]; then echo "LAST_STATUS matches SUCCESS"; else echo "LAST_STATUS NOT matches SUCCESS"; fi
+if [[ "$EMAIL_FAILURE_SUCCESS_OVERRIDE" == true ]]; then echo "EMAIL_FAILURE_SUCCESS_OVERIDE matches TRUE"; else echo "EMAIL_FAILURE_SUCCESS_OVERIDE NOT matches TRUE "; fi
+echo "----------"
+
+
+	if [ $CURRENT_STATUS == "SUCCESS" ]
+	then
+		echo "Success"
+		# If today is one of the success days AND
+		#   If TYPE is ALL
+		#     OR
+		#   If the last run day is not today and Type is FIRST
+		#   OR
+		# LAST_STATUS was failure, now success, and override is true
+
+		if [[ ( ( $EMAIL_SUCCESS_DAYS == *$DOW* ) && ( ( "$EMAIL_SUCCESS_TYPE" == "ALL" ) || ( $LAST_DAY -ne $DOW && "$EMAIL_SUCCESS_TYPE" == "FIRST" ) ) ) || ( ( "$LAST_STATUS" == "FAILURE" && "$EMAIL_FAILURE_SUCCESS_OVERRIDE" == true ) ) ]]
+		then :
+		else
+			echo "NOT sending success email"
+			SEND_TODAY=false
+		fi
+	else
+		echo "Failure"
+		# If today is one of the failure days AND
+		#   If TYPE is ALL
+		#     OR
+		#   If the last run day is not today and Type is FIRST
+		#     OR
+		#   LAST_STATUS was success, now failure, and override is true
+
+		if [[ ( ( $EMAIL_FAILURE_DAYS == *$DOW* ) && ( ( "$EMAIL_FAILURE_TYPE" == "ALL" ) || ( $LAST_DAY -ne $DOW && "$EMAIL_FAILURE_TYPE" == "FIRST" ) ) ) || ( ( "$LAST_STATUS" == "SUCCESS" && "$EMAIL_FAILURE_SUCCESS_OVERRIDE" == true ) ) ]]
+		then :
+		else
+			echo "NOT sending failure email"
+			SEND_TODAY=false
+		fi
+	fi
+
+
+if [[ $SEND_TODAY == true ]]
+then
+	LogThis "Sending $CURRENT_STATUS email"
 	$SENDMAIL_PATH -F $SENDER_NAME -f $SENDER_EMAIL -it <<-END_MESSAGE
 		To: $RECIPIENT_EMAIL
 		Subject: $SUBJECT
@@ -167,6 +261,10 @@ SendEmailNow()
 		MIME-Version: 1.0
 		$BODY
 		END_MESSAGE
+else
+	LogThis "NOT sending $CURRENT_STATUS email"
+fi
+
 }
 
 
@@ -275,7 +373,7 @@ then
 			</body>
 		</html>
 	"
-	SendEmailNow "$SUBJECT" "$BODY"
+	SendEmailNow "FAILURE" "$SUBJECT" "$BODY"
 	exit 1
 else
 	## Check the count, if it is 0, we shouldn't continue
@@ -301,7 +399,7 @@ else
 				</body>
 			</html>
 		"
-		SendEmailNow "$SUBJECT" "$BODY"
+		SendEmailNow "FAILURE" "$SUBJECT" "$BODY"
 		exit 1
 	else
 		## Download didn't fail, so should be successful
@@ -599,7 +697,7 @@ BODY="
 	</body>
 </html>
 "
-SendEmailNow "$SUBJECT" "$BODY"
+SendEmailNow "SUCCESS" "$SUBJECT" "$BODY"
 
 ## If DELETE_ALL_FILES_ON_COMPLETION is set, delete all files on completion.
 if [ $DELETE_ALL_FILES_ON_COMPLETION = true ]
