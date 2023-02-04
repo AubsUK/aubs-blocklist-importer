@@ -1,0 +1,2 @@
+# Add IP addresses to this list, one on each line, to make sure they are always blocked and never allowed
+192.0.2.2
