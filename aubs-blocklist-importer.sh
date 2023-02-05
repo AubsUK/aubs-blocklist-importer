@@ -37,43 +37,43 @@ DELETE_ALL_FILES_ON_COMPLETION=true
 DOWNLOAD_FILE="http://lists.blocklist.de/lists/all.txt" 	# The text file that contains all the IPs to use
 
 
-CHAINNAME="blocklist-de"							# The Chain name to import the IPs into
+CHAINNAME="blocklist-de"					# The Chain name to import the IPs into
 ACTION="REJECT" # Can be DROP or REJECT				# The action to assign to the IPs for this Chain
-MIN_COUNT="100"										# If the downloaded file contains less than this number of rows, consider it failed
+MIN_COUNT="100"							# If the downloaded file contains less than this number of rows, consider it failed
 
 ## Base defaults - Set the base path and filename here
 PathOfScript="$(dirname "$(realpath "$0")")/"
-BASE_PATH="$PathOfScript"							# The base path for all files
-BLOCKLIST_BASE_FILE="ip-blocklist"					# The base filename for all files related to the blocklist
+BASE_PATH="$PathOfScript"					# The base path for all files
+BLOCKLIST_BASE_FILE="ip-blocklist"				# The base filename for all files related to the blocklist
 
 
 ## E-Mail variables
-SENDER_NAME="Notifications"							# Display name for the sending email address
+SENDER_NAME="Notifications"					# Display name for the sending email address
 SENDER_EMAIL="notifications@$(hostname -f)"			# Sending email address ('hostname -f' puts the FQDN)
 RECIPIENT_EMAIL="servers@$(hostname -d)"			# Comma separated recipient addresses ('hostname -d' puts domain name)
-SUBJECT="$(hostname -f) - IP blocklist update - "	# Subject start for the email.
-EMAIL_SUCCESS_DAYS=1,4								# Days SUCCESS emails should be sent [1=Monday, 7=Sunday] (1,=Mon,Thu)
-EMAIL_SUCCESS_TYPE="FIRST"							# When to send success emails (if run multiple times a day) [NONE, FIRST, ALL] (only on the days in SUCCESS_DAYS)
-EMAIL_FAILURE_DAYS=1,2,3,4,5,6,7					# Days FAILURE emails should be sent [1=Monday, 7=Sunday] (1,3,6=Mon,Wed,Sat)
-EMAIL_FAILURE_TYPE="FIRST"							# When to send failure emails (if run multiple times a day) [NONE, FIRST, ALL]
-EMAIL_FAILURE_SUCCESS_OVERRIDE=true					# For multi-day runs, as long as the FAILURE_DAYS is 1-7 and FAILURE_TYPE isn't NONE, when a FAILURE
-													#   is received after a SUCCESS, an email will be sent (last run=success, this run=failure).
-													#   The same will happen for SUCCESS if SUCCESS_DAYS is 1-7 and SUCCESS_TYPE isn't NONE, that after a
-													#   FAILURE, a SUCCESS email will be received.
-													#   On the other hand, as FAILUREs will be sent, a SUCCESS might not to confirm it has been restored
-													#   until the next SUCCESS_DAY when a SUCCESS can be received.  Set this to true and a FAILURE/SUCCESS
-													#   email will be sent the first time the new status changes, but no other times unless scheduled.
+SUBJECT="$(hostname -f) - IP blocklist update - "		# Subject start for the email.
+EMAIL_SUCCESS_DAYS=1,4						# Days SUCCESS emails should be sent [1=Monday, 7=Sunday] (1,=Mon,Thu)
+EMAIL_SUCCESS_TYPE="FIRST"					# When to send success emails (if run multiple times a day) [NONE, FIRST, ALL] (only on the days in SUCCESS_DAYS)
+EMAIL_FAILURE_DAYS=1,2,3,4,5,6,7				# Days FAILURE emails should be sent [1=Monday, 7=Sunday] (1,3,6=Mon,Wed,Sat)
+EMAIL_FAILURE_TYPE="FIRST"					# When to send failure emails (if run multiple times a day) [NONE, FIRST, ALL]
+EMAIL_FAILURE_SUCCESS_OVERRIDE=true				# For multi-day runs, as long as the FAILURE_DAYS is 1-7 and FAILURE_TYPE isn't NONE, when a FAILURE
+								#   is received after a SUCCESS, an email will be sent (last run=success, this run=failure).
+								#   The same will happen for SUCCESS if SUCCESS_DAYS is 1-7 and SUCCESS_TYPE isn't NONE, that after a
+								#   FAILURE, a SUCCESS email will be received.
+								#   On the other hand, as FAILUREs will be sent, a SUCCESS might not to confirm it has been restored
+								#   until the next SUCCESS_DAY when a SUCCESS can be received.  Set this to true and a FAILURE/SUCCESS
+								#   email will be sent the first time the new status changes, but no other times unless scheduled.
 
 
 ## Permanent Files
-OVERRIDE_ALLOWLIST_PATH=$BASE_PATH					# Path for the override allow-list (default is the same as the base path)
-OVERRIDE_ALLOWLIST_FILE="override-allowlist.txt"	# Override allow-list filename
-OVERRIDE_BLOCKLIST_PATH=$BASE_PATH					# Path for the override block-list (default is the same as the base path)
-OVERRIDE_BLOCKLIST_FILE="override-blocklist.txt"	# Override block-list filename
-LOGFILE_PATH="/var/log/aubs-blocklist-importer/"	# Path for the log file.  Should not contain the filename.
+OVERRIDE_ALLOWLIST_PATH=$BASE_PATH				# Path for the override allow-list (default is the same as the base path)
+OVERRIDE_ALLOWLIST_FILE="override-allowlist.txt"		# Override allow-list filename
+OVERRIDE_BLOCKLIST_PATH=$BASE_PATH				# Path for the override block-list (default is the same as the base path)
+OVERRIDE_BLOCKLIST_FILE="override-blocklist.txt"		# Override block-list filename
+LOGFILE_PATH="/var/log/aubs-blocklist-importer/"		# Path for the log file.  Should not contain the filename.
 LOGFILE_FILE="aubs-blocklist-importer.log"			# Filename for the logging.
-LAST_RUN_PATH=$BASE_PATH							# Status of the last run (includes the day number for use in email allowed days)
-LAST_RUN_FILE="Last_Run_Status.txt"					# Status of the last run (includes the day number for use in email allowed days)
+LAST_RUN_PATH=$BASE_PATH					# Status of the last run (includes the day number for use in email allowed days)
+LAST_RUN_FILE="Last_Run_Status.txt"				# Status of the last run (includes the day number for use in email allowed days)
 
 ## Packages used - If needed, set these manually to the required path (e.g. IPTABLES_PATH="/sbin/iptables")
 IPTABLES_PATH="$(which iptables)"
@@ -102,23 +102,23 @@ OVERRIDE_BLOCKLIST=$OVERRIDE_BLOCKLIST_PATH$OVERRIDE_BLOCKLIST_FILE
 BLOCKLIST_BASE_FILEPATH=$BASE_PATH$BLOCKLIST_BASE_FILE
 
 # Temporary files created based on the base file.  All related files will be created in the same location
-BLOCKLIST_FILE=$BLOCKLIST_BASE_FILEPATH.download							# Main file that the download list is imported into and processed
-BLOCKLIST_EXISTING=$BLOCKLIST_BASE_FILEPATH.existing						# List of existing IPs from the current IP chain
-BLOCKLIST_EXISTING_CHECK1=$BLOCKLIST_BASE_FILEPATH.existing.check1			# List of IPs to confirm successful import
+BLOCKLIST_FILE=$BLOCKLIST_BASE_FILEPATH.download				# Main file that the download list is imported into and processed
+BLOCKLIST_EXISTING=$BLOCKLIST_BASE_FILEPATH.existing				# List of existing IPs from the current IP chain
+BLOCKLIST_EXISTING_CHECK1=$BLOCKLIST_BASE_FILEPATH.existing.check1		# List of IPs to confirm successful import
 BLOCKLIST_EXISTING_VALIDATE1=$BLOCKLIST_BASE_FILEPATH.existing.validate1	# List of IPs remaining after checking
-BLOCKLIST_EXISTING_CHECK2=$BLOCKLIST_BASE_FILEPATH.existing.check2			# List of IPs to confirm successful import
+BLOCKLIST_EXISTING_CHECK2=$BLOCKLIST_BASE_FILEPATH.existing.check2		# List of IPs to confirm successful import
 BLOCKLIST_EXISTING_VALIDATE2=$BLOCKLIST_BASE_FILEPATH.existing.validate2	# List of IPs remaining after checking
-BLOCKLIST_ORIGINAL=$BLOCKLIST_FILE.Original									# Copy of the original download file
-BLOCKLIST_IPV4=$BLOCKLIST_FILE.IPv4											# Downloaded file processed with only IPv4 addresses
-BLOCKLIST_OVERRIDE_ALLOWLIST=$BLOCKLIST_FILE.OverrideAllow					# Downloaded file processed with override allow-list addresses removed
-BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP=$BLOCKLIST_FILE.OverrideAllowTEMP			# Temporary override allow-list files sorted and deduped
-BLOCKLIST_OVERRIDE_BLOCKLIST=$BLOCKLIST_FILE.OverrideBlock					# Downloaded file processed with override block-list addresses added
-BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP=$BLOCKLIST_FILE.OverrideBlockTEMP			# Temporary override block-list files sorted and deduped
-BLOCKLIST_DEDUPE=$BLOCKLIST_FILE.Dedupe										# Downloaded file processed with duplicates removed
-BLOCKLIST_COMPARE=$BLOCKLIST_FILE.compare									# Comparison between processed download file and existing list
-BLOCKLIST_COMPARE_ADD=$BLOCKLIST_FILE.compare.add							# Items processed that aren't in the existing (to be added)
-BLOCKLIST_COMPARE_REM=$BLOCKLIST_FILE.compare.rem							# Existing items that aren't in the processed (to be removed)
-LAST_RUN_STATUS=$LAST_RUN_PATH$LAST_RUN_FILE								# Last run file, contains SUCCESS or FAILURE and a number for the day last run
+BLOCKLIST_ORIGINAL=$BLOCKLIST_FILE.Original					# Copy of the original download file
+BLOCKLIST_IPV4=$BLOCKLIST_FILE.IPv4						# Downloaded file processed with only IPv4 addresses
+BLOCKLIST_OVERRIDE_ALLOWLIST=$BLOCKLIST_FILE.OverrideAllow			# Downloaded file processed with override allow-list addresses removed
+BLOCKLIST_OVERRIDE_ALLOWLIST_TEMP=$BLOCKLIST_FILE.OverrideAllowTEMP		# Temporary override allow-list files sorted and deduped
+BLOCKLIST_OVERRIDE_BLOCKLIST=$BLOCKLIST_FILE.OverrideBlock			# Downloaded file processed with override block-list addresses added
+BLOCKLIST_OVERRIDE_BLOCKLIST_TEMP=$BLOCKLIST_FILE.OverrideBlockTEMP		# Temporary override block-list files sorted and deduped
+BLOCKLIST_DEDUPE=$BLOCKLIST_FILE.Dedupe						# Downloaded file processed with duplicates removed
+BLOCKLIST_COMPARE=$BLOCKLIST_FILE.compare					# Comparison between processed download file and existing list
+BLOCKLIST_COMPARE_ADD=$BLOCKLIST_FILE.compare.add				# Items processed that aren't in the existing (to be added)
+BLOCKLIST_COMPARE_REM=$BLOCKLIST_FILE.compare.rem				# Existing items that aren't in the processed (to be removed)
+LAST_RUN_STATUS=$LAST_RUN_PATH$LAST_RUN_FILE					# Last run file, contains SUCCESS or FAILURE and a number for the day last run
 
 ## If the logfile path doesn't exist, make it, then touch the file to create it if needed
 mkdir -p $LOGFILE_PATH
