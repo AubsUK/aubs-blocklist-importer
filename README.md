@@ -34,15 +34,22 @@ This is a simple blocklist import script that works with single IPv4 addresses (
   - It then checks if the re-import of the known-good list is successful
 - Full logging
 - Email notifications
+  - Email Success/Failure switches, these allow set days when 'success' and 'failure' emails are sent.
+  - Notifications can also be set so if a 'failure' occurs, a the next 'success' is also alerted, even if it's not a 'success' alert day.
+
 
 <br/><br/>
 
 
 # Quick Start
 |[Back to top](#aubs-blocklist-importer)|<br/><br/>
-Clone the repository
+Switch to a secure location to hold the script
 ```
-git clone https://github.com/AubsUK/aubs-blocklist-importer
+cd /usr/local/sbin/
+```
+Clone the repository as root so permissions are set appropriately
+```
+sudo git clone https://github.com/AubsUK/aubs-blocklist-importer
 ```
 or just create the three files manually, and copy their contents
 
@@ -51,7 +58,7 @@ Make the script executable
 cd aubs-blocklist-importer
 chmod 700 aubs-blocklist-importer.sh
 ```
-Edit ```override-allowlist.txt``` and ```override-blocklist.txt``` to include IPs to never block (e.g. your own servers) and always block (servers who frequently attack you)<br/>
+Edit ```override-allowlist.txt``` and ```override-blocklist.txt``` to include IPs to never block (e.g. your own servers) and always block (servers that frequently attack you)<br/>
 
 Add an entry into Cron
 ```
@@ -60,9 +67,9 @@ sudo nano /etc/crontab
 Add in:
 ```
 # Blocklist Importer
-30 1 * * * root /path/to/MyScripts/aubs-blocklist-importer/aubs-blocklist-importer.sh
+0 * * * * root /usr/local/sbin/aubs-blocklist-importer/aubs-blocklist-importer.sh # Run on the hour, every hour
 ```
-**Note:** Make it as frequent as required (within reason, check the blocklist's website to confirm the maximum); You shouldn't use root, so will need to create a user account, allow it to edit the log files and run the script etc.)
+**Note:** Make it as frequent as required (within reason, check the blocklist's website to confirm the maximum);
 
 <br/><br/>
 
@@ -152,9 +159,36 @@ REJECT
 </td>
 </tr>
 <tr>
+<td>
+
+`MIN_COUNT`
+
+</td>
+<td>
+Minimum IPs in the download file to consider it a legitimate download
+</td>
+<td>
+100
+</td>
+</tr>
+<tr>
 <td colspan=3>
 
 ### Base defaults
+
+</td>
+</tr>
+<tr>
+<td>
+
+`PathOfScript=`
+
+</td>
+<td>
+Path of the script file
+<td>
+
+"$(dirname "$(realpath "$0")")/"
 
 </td>
 </tr>
@@ -249,6 +283,84 @@ Start of the subject for success and failure emails
 `server.domain.co.uk - IP blocklist update - `<br/>(where server.domain.co.uk is provided from `hostname -f`)
 
 </td>
+</tr>
+<tr>
+<td>
+
+`EMAIL_SUCCESS_DAYS`
+
+</td>
+<td>
+Days SUCCESS emails should be sent - Leave blank to disable [1=Monday, 7=Sunday] (1,4=Mon,Thu)
+</td>
+<td>
+
+1,4
+
+</td>
+</tr>
+<tr>
+<td>
+
+`EMAIL_SUCCESS_TYPE`
+
+</td>
+<td>
+When to send success emails (if run multiple times a day) [NONE, FIRST, ALL] (only on the days in SUCCESS_DAYS)
+</td>
+<td>
+
+FIRST
+
+</td>
+</tr>
+<tr>
+<td>
+
+`EMAIL_FAILURE_DAYS=`
+
+</td>
+<td>
+Days FAILURE emails should be sent - Leave blank to disable [1=Monday, 7=Sunday] (1,2,3,4,5,6,7=Mon,Tue,Wed,Thu,Fri,Sat,Sun)
+</td>
+<td>
+
+1,2,3,4,5,6,7
+
+</td>
+</tr>
+<tr>
+<td>
+
+`EMAIL_FAILURE_TYPE`
+
+</td>
+<td>
+When to send failure emails (if run multiple times a day) [NONE, FIRST, ALL]
+</td>
+<td>
+
+FIRST
+
+</td>
+</tr>
+<tr>
+<td>
+
+`EMAIL_FAILURE_SUCCESS_OVERRIDE`
+
+</td>
+<td>
+For multi-day runs, as long as the FAILURE_DAYS is 1-7 and FAILURE_TYPE isn't NONE, when a FAILURE is received after a SUCCESS, an email will be sent (last run=success, this run=failure).
+<br>
+The same will happen for SUCCESS if SUCCESS_DAYS is 1-7 and SUCCESS_TYPE isn't NONE, that after a FAILURE, a SUCCESS email will be received.
+<br>
+On the other hand, as FAILUREs will be sent, a SUCCESS might not to confirm it has been restored until the next SUCCESS_DAY when a SUCCESS can be received.  Set this to true and a FAILURE/SUCCESS email will be sent the first time the new status changes, but no other times unless scheduled.
+</td>
+<td>
+
+true
+
 </td>
 </tr>
 <tr>
@@ -342,6 +454,82 @@ Filename of the log file
 aubs-blocklist.log
 </td>
 </tr>
+
+<tr>
+<td>
+
+`LAST_RUN_PATH`
+
+</td>
+<td>
+Location of the last run file
+</td>
+<td>
+$BASE_PATH
+</td>
+</tr>
+<tr>
+<td>
+
+`LAST_RUN_FILE`
+
+</td>
+<td>
+Filename of the last run information (this includes the day number for use in email allowed days)
+</td>
+<td>
+Last_Run_Status.txt
+</td>
+</tr>
+<tr>
+<td colspan=3>
+
+### Packages used
+
+</td>
+</tr>
+<tr>
+<td>
+
+`IPTABLES_PATH`
+<br>
+`IPSET_PATH`
+<br>
+`SORT_PATH`
+<br>
+`SENDMAIL_PATH`
+<br>
+`GREP_PATH`
+<br>
+`WGET_PATH`
+<br>
+`PERL_PATH`
+
+
+</td>
+<td>
+Location of the main packages used.  These should normally be installed, but if not, it'll report in the log and stop running
+</td>
+<td>
+
+$(which iptables)
+<br>
+$(which ipset)
+<br>
+$(which sort)
+<br>
+$(which sendmail)
+<br>
+$(which grep)
+<br>
+$(which wget)
+<br>
+$(which perl)
+
+</td>
+</tr>
+<tr>
+
 </table>
 
 <br/><br/>
@@ -380,11 +568,13 @@ And the second is used after the first validation check fails, which then preten
 7. --DONE-- ~~Change logging to give the option to enter additional test (e.g. 'done' at the end of the previous logged line)~~
 8. Consider removing the variables for the programs being used, I don't really think these are necessary because the ones being used are mostly 'standard' - Check if they are POSIX, or alternatives.  Most others being used are: date, touch, echo, if, exit, rm, mv, cp, wc, sed, comm, cat. [ipset was not on some of my servers]
 9. Work with subnets, expand them to individual IPs or if IPSet allows them.
-10. Enable/Disable email notifications, or set them to only send every X days (and list the days in email).
+10. --DONE-- ~~Enable/Disable email notifications, or set them to only send every X days (and list the days in email).~~
 11. --DONE-- ~~Check import was successful~~
 12. Warn if any 'override allow' exist in the blocklist
 13. Allow use of list from a local file (e.g. manual syncing)
 14. --DONE-- ~~Don't import if downloaded file contains less than a defined number of rows~~
+15. If a run results in a 'success' but errors or critical, it should send a FAILURE email.
+16. Correct spelling mistake on [L638](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L638)
 
 <br/><br/>
 
@@ -400,11 +590,11 @@ And the second is used after the first validation check fails, which then preten
 - Exported the new existing list [20052]; compared it to the expected filtered download list [20052]; confirmed both match
 - Finished in 6 seconds.
 ```
-me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
+me@server:/usr/local/sbin/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
 Tue 26 Jul 22:39:42 BST 2022:  ================================================================================
 Tue 26 Jul 22:39:42 BST 2022:
-Tue 26 Jul 22:39:42 BST 2022:  Using Base Path [ /path/to/MyScripts/aubs-blocklist-importer/ ]
-Tue 26 Jul 22:39:42 BST 2022:  Deleting any existing blocklist files. (/path/to/MyScripts/aubs-blocklist-importer/ip-blocklist.*)
+Tue 26 Jul 22:39:42 BST 2022:  Using Base Path [ /usr/local/sbin/aubs-blocklist-importer/ ]
+Tue 26 Jul 22:39:42 BST 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
 Tue 26 Jul 22:39:42 BST 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20127]
 Tue 26 Jul 22:39:43 BST 2022:
 Tue 26 Jul 22:39:43 BST 2022:  Filter out anything not an IPv4 address [20051]
@@ -427,6 +617,9 @@ Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  Checking imported 'blocklist-de' matches downloaded list... Filtered Download [20052] - Filtered Existing [20052]... Validated
 Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  Process finished in 0 Minutes and 6 Seconds.
+Tue 26 Jul 22:39:48 BST 2022:  Writing last status of [SUCCESS6] to /usr/local/sbin/aubs-blocklist-importer/Last_Run_Status.txt
+Tue 26 Jul 22:39:48 BST 2022:  NOT sending SUCCESS email
+Tue 26 Jul 22:39:48 BST 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
 Tue 26 Jul 22:39:48 BST 2022:
 Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
 ```
@@ -440,11 +633,11 @@ Tue 26 Jul 22:39:48 BST 2022:  =================================================
 - Rebuilds IPtable and IPset config for the chain.
 - Imports the list and confirms it matches the last known good.
 ```
-me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
+me@server:/usr/local/sbin/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
 Tue 26 Jul 23:25:25 BST 2022:  ================================================================================
 Tue 26 Jul 23:25:25 BST 2022:
-Tue 26 Jul 23:25:25 BST 2022:  Using Base Path [ /path/to/MyScripts/aubs-blocklist-importer/ ]
-Tue 26 Jul 23:25:25 BST 2022:  Deleting any existing blocklist files. (/path/to/MyScripts/aubs-blocklist-importer/ip-blocklist.*)
+Tue 26 Jul 23:25:25 BST 2022:  Using Base Path [ /usr/local/sbin/aubs-blocklist-importer/ ]
+Tue 26 Jul 23:25:25 BST 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
 Tue 26 Jul 23:25:25 BST 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20141]
 Tue 26 Jul 23:25:26 BST 2022:
 Tue 26 Jul 23:25:26 BST 2022:  Filter out anything not an IPv4 address [20067]
@@ -499,11 +692,11 @@ Tue 26 Jul 23:25:48 BST 2022:  =================================================
 - Not much can be done now, the IPset will contain what it has, but may need manual intervention.
 - The next automatic run may correct this.
 ```
-me@server:/path/to/MyScripts/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
+me@server:/usr/local/sbin/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
 Tue 26 Jul 23:28:16 BST 2022:  ================================================================================
 Tue 26 Jul 23:28:16 BST 2022:
-Tue 26 Jul 23:28:16 BST 2022:  Using Base Path [ /path/to/MyScripts/aubs-blocklist-importer/ ]
-Tue 26 Jul 23:28:16 BST 2022:  Deleting any existing blocklist files. (/path/to/MyScripts/aubs-blocklist-importer/ip-blocklist.*)
+Tue 26 Jul 23:28:16 BST 2022:  Using Base Path [ /usr/local/sbin/aubs-blocklist-importer/ ]
+Tue 26 Jul 23:28:16 BST 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
 Tue 26 Jul 23:28:16 BST 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20141]
 Tue 26 Jul 23:28:16 BST 2022:
 Tue 26 Jul 23:28:16 BST 2022:  Filter out anything not an IPv4 address [20067]
@@ -547,6 +740,27 @@ Tue 26 Jul 23:28:39 BST 2022:  =================================================
 
 ```
 ![Critical Email](images/Example-Email-Critical.png)
+
+<br/><br/>
+## Unsuccessful automatic run (tried to download the list, but it wasn't successful)
+- As with the unsuccessful run, the download import failed.  This time, the restore also fails.
+- Testing removed 5 IPs from the filtered download [20068] --> [20063]; doesn't match the live list [20063].
+- Rebuilds IPtable and IPset config for the chain.
+- Imports the last known good list
+- Testing removes 5 IPs from the last known good after importing [20052] --> [20047]; fails to match the live list [20052].
+- Not much can be done now, the IPset will contain what it has, but may need manual intervention.
+- The next automatic run may correct this.
+```
+me@server:/usr/local/sbin/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.shSat 10 Dec 22:21:14 GMT 2022:  ================================================================================
+Sat 10 Dec 22:21:14 GMT 2022:
+Sat 10 Dec 22:21:14 GMT 2022:  Using Base Path [ /usr/local/sbin/aubs-blocklist-importer/ ]
+Sat 10 Dec 22:21:14 GMT 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
+Sat 10 Dec 22:21:14 GMT 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt...  IP blocklist could not be downloaded from 'http://lists.blocklist.de/lists/all.txt' [ Downloaded 0, below minimum of 100]
+Sat 10 Dec 22:21:14 GMT 2022:  Writing last status of [FAILURE7] to /usr/local/sbin/aubs-blocklist-importer/Last_Run_Status.txt
+Sat 10 Dec 22:21:14 GMT 2022:  Sending FAILURE email
+Sat 10 Dec 22:21:14 GMT 2022:  ================================================================================
+
+
 
 <br/><br/>
 
