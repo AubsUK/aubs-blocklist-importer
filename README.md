@@ -697,6 +697,7 @@ And the second is used after the first validation check fails, which then preten
 14. --DONE-- ~~Don't import if downloaded file contains less than a defined number of rows~~
 15. If a run results in a 'success' but errors or critical, it should send a FAILURE email.
 16. Correct spelling mistake on [L638](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L638)
+17. Remove debugging messages from [L201 to L217](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L201)
 
 <br/><br/>
 
