@@ -8,6 +8,7 @@
 [Information](#information)<br/>
 [Quick Start](#quick-start)<br/>
 [Configurable Options](#configurable-options)<br/>
+[Files Used and Created](#files-used-and-created)<br/>
 [Planned changes](#planned-changes-in-no-particular-order)<br/>
 [Example outputs](#example-outputs)<br/>
 [Removal](#removal)<br/>
@@ -80,6 +81,120 @@ Add in:
 
 <br/><br/>
 
+# Files Used and Created
+
+|[Back to top](#aubs-blocklist-importer)|<br/><br/>
+
+Following the Quick Start instructions and not modifying any variables, the following files are used:
+
+### /usr/local/sbin/aubs-blocklist-importer/
+
+<table>
+<tr><th>File Name</th><th>Purpose</th></tr>
+<tr>
+<td>aubs-blocklist-importer.sh</td>
+<td>The script file</td>
+</tr>
+<tr>
+<td>override-allowlist.txt</td>
+<td>Override allow-list containing IPs one on each line to always allow even if they *are* in the blocklist</td>
+</tr>
+<tr>
+<td>override-blocklist.txt</td>
+<td>Override block-list containing IPs one on each line to always block even if they *are not* in the blocklist</td>
+</tr>
+<tr>
+<td>Last_Run_Status.txt</td>
+<td>Stores the status of the last run and the day</td>
+</tr>
+</table>
+
+
+### /var/log/
+<table>
+<tr><th>File Name</th><th>Purpose</th></tr>
+<td>aubs-blocklist-importer.log</td>
+<td>Stores the logs from each run</td>
+</tr>
+<tr>
+<td>
+.git/ (folder and all sub files)
+<br>
+images/ (folder and all sub files)
+<br>
+LICENSE<br>README.md<br>
+</td>
+<td>Git files, not used by the script</td>
+</tr>
+</table>
+
+### /usr/local/sbin/aubs-blocklist-importer/
+If `DELETE_ALL_FILES_ON_COMPLETION` is set to `false` the following files will remain in the main folder, otherwise they will be deleted after each run
+<table>
+<tr><th>File Name</th><th>Purpose</th></tr>
+<tr>
+<td>ip-blocklist.download</td>
+<td>Main file that the download list is imported into and processed</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.compare.add</td>
+<td>Items processed that aren't in the existing (to be added)</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.compare.rem</td>
+<td>Existing items that aren't in the processed (to be removed)</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.Dedupe</td>
+<td>Downloaded file processed with duplicates removed</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.IPv4</td>
+<td>Downloaded file processed with only IPv4 addresses</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.Original</td>
+<td>Copy of the original download file</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.OverrideAllow</td>
+<td>Downloaded file processed with override allow-list addresses removed</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.OverrideAllowTEMP</td>
+<td>Temporary override allow-list files sorted and deduped</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.OverrideBlock</td>
+<td>Downloaded file processed with override block-list addresses added</td>
+</tr>
+<tr>
+<td>ip-blocklist.download.OverrideBlockTEMP</td>
+<td>Temporary override block-list files sorted and deduped</td>
+</tr>
+<tr>
+<td>ip-blocklist.existing</td>
+<td>List of existing IPs from the current IP chain</td>
+</tr>
+<tr>
+<td>ip-blocklist.existing.check1</td>
+<td>List of IPs to confirm successful import</td>
+</tr>
+<tr>
+<td>ip-blocklist.existing.check2</td>
+<td>List of IPs to confirm successful import></td>
+</tr>
+<tr>
+<td>ip-blocklist.existing.validate1</td>
+<td>List of IPs remaining after checking</td>
+</tr>
+<tr>
+<td>ip-blocklist.existing.validate2</td>
+<td>List of IPs remaining after checking</td>
+</tr>
+</table>
+
+<br/><br/>
 
 # Configurable Options
 
