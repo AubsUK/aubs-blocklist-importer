@@ -10,6 +10,7 @@
 [Configurable Options](#configurable-options)<br/>
 [Planned changes](#planned-changes-in-no-particular-order)<br/>
 [Example outputs](#example-outputs)<br/>
+[Removal](#removal)<br/>
 [Notes](#notes)<br/>
 
 <br/><br/>
@@ -56,9 +57,15 @@ or just create the three files manually, and copy their contents
 Make the script executable
 ```
 cd aubs-blocklist-importer
-chmod 700 aubs-blocklist-importer.sh
+sudo chmod 700 aubs-blocklist-importer.sh
 ```
 Edit ```override-allowlist.txt``` and ```override-blocklist.txt``` to include IPs to never block (e.g. your own servers) and always block (servers that frequently attack you)<br/>
+```
+sudo nano override-allowlist.txt
+```
+```
+sudo nano override-blocklist.txt
+```
 
 Add an entry into Cron
 ```
@@ -761,6 +768,27 @@ Sat 10 Dec 22:21:14 GMT 2022:  Sending FAILURE email
 Sat 10 Dec 22:21:14 GMT 2022:  ================================================================================
 ```
 
+
+<br/><br/>
+
+# Removal
+If you installed the script using the quick start guide, it's pretty easy to remove.
+
+Edit crontab and remove the ```# Blocklist Importer``` line and the line below it:
+```
+sudo nano /etc/crontab
+```
+Move into the sbin folder and delete the ```aubs-blocklist-importer``` folder:
+```
+cd /usr/local/sbin/
+sudo rm -r aubs-blocklist-importer
+```
+Move into the logs folder and delete the ```aubs-blocklist-importer``` folder:
+```
+cd /var/log/
+sudo rm -r aubs-blocklist-importer
+```
+That's it, everything has been removed.
 
 <br/><br/>
 
