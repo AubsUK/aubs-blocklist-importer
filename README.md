@@ -698,7 +698,7 @@ And the second is used after the first validation check fails, which then preten
 15. If a run results in a 'success' but errors or critical, it should send a FAILURE email.
 16. Correct spelling mistake on [L638](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L638)
 17. Remove debugging messages from [L201 to L217](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L201) and [L222](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L222) and [L233](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L233) and [L248](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L248)
-18. Ass automatic retry count/delay to reduce the number of failure emails.
+18. Add automatic retry count/delay to reduce the number of failure emails.
 
 
 <br/><br/>
