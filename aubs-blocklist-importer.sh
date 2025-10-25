@@ -25,6 +25,7 @@
 ##			Allows failures to be alerted without the constant bombardment of successes
 ##			Also allows an override to send one Success/Failure after the opposite is received, even
 ##			  if it shouldn't email on those days.
+##  v0.3.0 - 2025-10-11 Added netfilter-persistent to maintain the list after a reboot
 ##
 ############################################################
 ############################################################
@@ -82,7 +83,7 @@ SORT_PATH="$(which sort)"
 SENDMAIL_PATH="$(which sendmail)"
 GREP_PATH="$(which grep)"
 WGET_PATH="$(which wget)"
-PERL_PATH="$(which perl)"
+NETFILTER_PERSISTENT_PATH="$(which netfilter-persistent)"
 
 
 ##################################################
@@ -341,7 +342,7 @@ if [[ `command -v $SORT_PATH` == "" ]]; then LogThis "Cannot find [ SORT_PATH ].
 if [[ `command -v $SENDMAIL_PATH` == "" ]]; then LogThis "Cannot find [ SENDMAIL_PATH ]. Is it installed? Exiting"; exit 1; fi;
 if [[ `command -v $GREP_PATH` == "" ]]; then LogThis "Cannot find [ GREP_PATH ]. Is it installed? Exiting"; exit 1; fi;
 if [[ `command -v $WGET_PATH` == "" ]]; then LogThis "Cannot find [ WGET_PATH ]. Is it installed? Exiting"; exit 1; fi;
-if [[ `command -v $PERL_PATH` == "" ]]; then LogThis "Cannot find [ PERL_PATH ]. Is it installed? Exiting"; exit 1; fi;
+if [[ `command -v $NETFILTER_PERSISTENT_PATH` == "" ]]; then LogThis "Cannot find [ NETFILTER_PERSISTENT_PATH ]. Is it installed? Exiting"; exit 1; fi;
 
 ## ========== ========== ========== ========== ========== ##
 
@@ -604,6 +605,14 @@ then
 	## Validation 2 files won't exist, so will cause an error later, let's touch them now to create them blank
 	touch $BLOCKLIST_EXISTING_CHECK2
 	touch $BLOCKLIST_EXISTING_VALIDATE2
+	# Save the new ipset to make it persistent
+	if [ -x "$NETFILTER_PERSISTENT_PATH" ]; then
+		LogThis -s "Saving persistent ipset rules..."
+		"$NETFILTER_PERSISTENT_PATH" save
+		LogThis -e "Done"
+	else
+		LogThis -e "WARNING: 'netfilter-persistent' not found. New ipset will not survive reboot."
+	fi
 else
 	LogThis -e "ERROR !!! - They don't match"
 	LogThis "An error occurred with importing the download"

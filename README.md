@@ -19,7 +19,7 @@
 
 # Information
 |[Back to top](#aubs-blocklist-importer)|<br/><br/>
-This is a simple blocklist import script that works with single IPv4 addresses (no ranges or IPv6 support yet).
+This is a simple blocklist import script that works with single IPv4 addresses (no ranges or IPv6 support yet)
 - Runs automatically (via Cron)
 - Imports a list of IPs to block from a URL text file
 - Strips out anything non-IPv4 related
@@ -34,10 +34,11 @@ This is a simple blocklist import script that works with single IPv4 addresses (
 - Checks the new live list matches the filtered import list
   - If it doesn't, it clears the configuration and tries to re-import the previous (known-good) list
   - It then checks if the re-import of the known-good list is successful
+- Saves the newly updated ipset lists to disk, making them persistent across reboots
 - Full logging
 - Email notifications
-  - Email Success/Failure switches, these allow set days when 'success' and 'failure' emails are sent.
-  - Notifications can also be set so if a 'failure' occurs, a the next 'success' is also alerted, even if it's not a 'success' alert day.
+  - Email Success/Failure switches, these allow set days when 'success' and 'failure' emails are sent
+  - Notifications can also be set so if a 'failure' occurs, a the next 'success' is also alerted, even if it's not a 'success' alert day
 
 
 <br/><br/>
@@ -45,6 +46,17 @@ This is a simple blocklist import script that works with single IPv4 addresses (
 
 # Quick Start
 |[Back to top](#aubs-blocklist-importer)|<br/><br/>
+Make sure the following packages are installed:
+```
+which iptables
+which ipset
+which sort
+which sendmail
+which grep
+which wget
+which netfilter-persistent
+which ipset-persistent
+```
 Switch to a secure location to hold the script
 ```
 cd /usr/local/sbin/
@@ -625,7 +637,7 @@ Last_Run_Status.txt
 <br>
 `WGET_PATH`
 <br>
-`PERL_PATH`
+`NETFILTER_PERSISTENT_PATH`
 
 
 </td>
@@ -646,7 +658,7 @@ $(which grep)
 <br>
 $(which wget)
 <br>
-$(which perl)
+$(which netfilter-persistent)
 
 </td>
 </tr>
@@ -676,7 +688,7 @@ And the second is used after the first validation check fails, which then preten
 # Planned changes (in no particular order)
 |[Back to top](#aubs-blocklist-importer)|<br/><br/>
 1. Allow cron to take the download file URL and chain name as variables, so multiple can be run from one script
-2. Using the same chain with multiple blocklists (perhaps download all at once, then filter through before adding - Size limitations?).
+2. Using the same chain with multiple blocklists (perhaps download all at once, then filter through before adding - Size limitations? What if one fails and the others don't?).
 3. Incorporate IPv6 IP addresses
 4. If a firewall rule exists in the chain, check if the ACTION is the same each time and change if it's different e.g. DROP to REJECT
 5. Check if the path is a path or a file/path for all variables
@@ -699,7 +711,7 @@ And the second is used after the first validation check fails, which then preten
 16. Correct spelling mistake on [L638](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L638)
 17. Remove debugging messages from [L201 to L217](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L201) and [L222](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L222) and [L233](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L233) and [L248](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L248)
 18. Add automatic retry count/delay to reduce the number of failure emails.
-
+19. --DONE-- ~~Save IPSet entries~~
 
 <br/><br/>
 
@@ -716,37 +728,38 @@ And the second is used after the first validation check fails, which then preten
 - Finished in 6 seconds.
 ```
 me@server:/usr/local/sbin/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
-Tue 26 Jul 22:39:42 BST 2022:  ================================================================================
-Tue 26 Jul 22:39:42 BST 2022:
-Tue 26 Jul 22:39:42 BST 2022:  Using Base Path [ /usr/local/sbin/aubs-blocklist-importer/ ]
-Tue 26 Jul 22:39:42 BST 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
-Tue 26 Jul 22:39:42 BST 2022:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20127]
-Tue 26 Jul 22:39:43 BST 2022:
-Tue 26 Jul 22:39:43 BST 2022:  Filter out anything not an IPv4 address [20051]
-Tue 26 Jul 22:39:43 BST 2022:  Removing duplicate IPs. [20051]
-Tue 26 Jul 22:39:43 BST 2022:  Removing Override allow-list IPs (3 unique) [20051]
-Tue 26 Jul 22:39:43 BST 2022:  Adding Override block-list IPs...  (1 unique) [20052]
-Tue 26 Jul 22:39:43 BST 2022:
-Tue 26 Jul 22:39:43 BST 2022:  Checking the configuration for 'blocklist-de'...
-Tue 26 Jul 22:39:43 BST 2022:      IP set already exists
-Tue 26 Jul 22:39:43 BST 2022:      Chain already exists
-Tue 26 Jul 22:39:43 BST 2022:      Chain already in INPUT
-Tue 26 Jul 22:39:43 BST 2022:      Firewall rule already exists in the chain
-Tue 26 Jul 22:39:43 BST 2022:
-Tue 26 Jul 22:39:43 BST 2022:  Getting the existing list for the 'blocklist-de' IP set
-Tue 26 Jul 22:39:43 BST 2022:
-Tue 26 Jul 22:39:43 BST 2022:  Comparing the New and Existing lists...
-Tue 26 Jul 22:39:43 BST 2022:  Adding [2211] new IPs into the IP set... Done
-Tue 26 Jul 22:39:45 BST 2022:  Removing [2866] old IPs from the IP set... Done
-Tue 26 Jul 22:39:48 BST 2022:
-Tue 26 Jul 22:39:48 BST 2022:  Checking imported 'blocklist-de' matches downloaded list... Filtered Download [20052] - Filtered Existing [20052]... Validated
-Tue 26 Jul 22:39:48 BST 2022:
-Tue 26 Jul 22:39:48 BST 2022:  Process finished in 0 Minutes and 6 Seconds.
-Tue 26 Jul 22:39:48 BST 2022:  Writing last status of [SUCCESS6] to /usr/local/sbin/aubs-blocklist-importer/Last_Run_Status.txt
-Tue 26 Jul 22:39:48 BST 2022:  NOT sending SUCCESS email
-Tue 26 Jul 22:39:48 BST 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
-Tue 26 Jul 22:39:48 BST 2022:
-Tue 26 Jul 22:39:48 BST 2022:  ================================================================================
+Fri 24 Oct 23:34:15 BST 2025:  ================================================================================
+Fri 24 Oct 23:34:15 BST 2025:
+Fri 24 Oct 23:34:15 BST 2025:  Using Base Path [ /usr/local/sbin/aubs-blocklist-importer/ ]
+Fri 24 Oct 23:34:15 BST 2025:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
+Fri 24 Oct 23:34:15 BST 2025:  Downloading the most recent IP list from http://lists.blocklist.de/lists/all.txt... Successful [20501]
+Fri 24 Oct 23:34:16 BST 2025:
+Fri 24 Oct 23:34:16 BST 2025:  Filter out anything not an IPv4 address [20419]
+Fri 24 Oct 23:34:16 BST 2025:  Removing duplicate IPs. [20419]
+Fri 24 Oct 23:34:16 BST 2025:  Removing Override allow-list IPs (4 unique) [20419]
+Fri 24 Oct 23:34:16 BST 2025:  Adding Override block-list IPs...  (18 unique) [20437]
+Fri 24 Oct 23:34:16 BST 2025:
+Fri 24 Oct 23:34:16 BST 2025:  Checking the configuration for 'blocklist-de'...
+Fri 24 Oct 23:34:16 BST 2025:      IP set already exists
+Fri 24 Oct 23:34:16 BST 2025:      Chain already exists
+Fri 24 Oct 23:34:16 BST 2025:      Chain already in INPUT
+Fri 24 Oct 23:34:16 BST 2025:      Firewall rule already exists in the chain
+Fri 24 Oct 23:34:16 BST 2025:
+Fri 24 Oct 23:34:16 BST 2025:  Getting the existing list for the 'blocklist-de' IP set
+Fri 24 Oct 23:34:16 BST 2025:
+Fri 24 Oct 23:34:16 BST 2025:  Comparing the New and Existing lists...
+Fri 24 Oct 23:34:17 BST 2025:  Adding [525] new IPs into the IP set... Done
+Fri 24 Oct 23:34:17 BST 2025:  Removing [558] old IPs from the IP set... Done
+Fri 24 Oct 23:34:17 BST 2025:
+Fri 24 Oct 23:34:17 BST 2025:  Checking imported 'blocklist-de' matches downloaded list... Filtered Download [20437] - Filtered Existing [20437]... Validated
+Fri 24 Oct 23:34:17 BST 2025:  Saving persistent ipset rules... Done
+Fri 24 Oct 23:34:17 BST 2025:
+Fri 24 Oct 23:34:17 BST 2025:  Process finished in 0 Minutes and 2 Seconds.
+Fri 24 Oct 23:34:17 BST 2025:  Writing last status of [SUCCESS5] to /usr/local/sbin/aubs-blocklist-importer/Last_Run_Status.txt
+Fri 24 Oct 23:34:17 BST 2025:  NOT sending SUCCESS email
+Fri 24 Oct 23:34:17 BST 2025:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
+Fri 24 Oct 23:34:17 BST 2025:
+Fri 24 Oct 23:34:17 BST 2025:  ================================================================================
 ```
 ![Successful Email](images/Example-Email-Successful.png)
 
@@ -876,7 +889,8 @@ Tue 26 Jul 23:28:39 BST 2022:  =================================================
 - Not much can be done now, the IPset will contain what it has, but may need manual intervention.
 - The next automatic run may correct this.
 ```
-me@server:/usr/local/sbin/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.shSat 10 Dec 22:21:14 GMT 2022:  ================================================================================
+me@server:/usr/local/sbin/aubs-blocklist-importer$ sudo ./aubs-blocklist-importer.sh
+Sat 10 Dec 22:21:14 GMT 2022:  ================================================================================
 Sat 10 Dec 22:21:14 GMT 2022:
 Sat 10 Dec 22:21:14 GMT 2022:  Using Base Path [ /usr/local/sbin/aubs-blocklist-importer/ ]
 Sat 10 Dec 22:21:14 GMT 2022:  Deleting any existing blocklist files. (/usr/local/sbin/aubs-blocklist-importer/ip-blocklist.*)
