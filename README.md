@@ -485,11 +485,7 @@ FIRST
 
 </td>
 <td>
-For multi-day runs, as long as the FAILURE_DAYS is 1-7 and FAILURE_TYPE isn't NONE, when a FAILURE is received after a SUCCESS, an email will be sent (last run=success, this run=failure).
-<br>
-The same will happen for SUCCESS if SUCCESS_DAYS is 1-7 and SUCCESS_TYPE isn't NONE, that after a FAILURE, a SUCCESS email will be received.
-<br>
-On the other hand, as FAILUREs will be sent, a SUCCESS might not to confirm it has been restored until the next SUCCESS_DAY when a SUCCESS can be received.  Set this to true and a FAILURE/SUCCESS email will be sent the first time the new status changes, but no other times unless scheduled.
+If true, sends an immediate notification email only when the status changes (e.g., from SUCCESS to FAILURE, or vice-versa), even if it's not a scheduled day for that type of email. This ensures you are alerted to the first failure and the first recovery.
 </td>
 <td>
 
@@ -585,7 +581,7 @@ A new directory in the /var/log/ path called `/var/log/aubs-blocklist-import/`
 Filename of the log file
 </td>
 <td>
-aubs-blocklist.log
+aubs-blocklist-importer.log
 </td>
 </tr>
 
@@ -708,9 +704,10 @@ And the second is used after the first validation check fails, which then preten
 13. Allow use of list from a local file (e.g. manual syncing)
 14. --DONE-- ~~Don't import if downloaded file contains less than a defined number of rows~~
 15. If a run results in a 'success' but errors or critical, it should send a FAILURE email.
-16. Correct spelling mistake on [L638](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L638)
-17. Remove debugging messages from [L201 to L217](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L201) and [L222](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L222) and [L233](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L233) and [L248](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L248)
+16. --FIXED-- Correct spelling mistake on [L638](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L638)
+17. --FIXED-- ~~Remove debugging messages from [L201 to L217](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L201) and [L222](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L222) and [L233](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L233) and [L248](https://github.com/AubsUK/aubs-blocklist-importer/blob/main/aubs-blocklist-importer.sh#L248)~~
 18. Add automatic retry count/delay to reduce the number of failure emails.
+19. --FIXED-- ~~Removed unused references to "ruby"~~
 19. --DONE-- ~~Save IPSet entries~~
 
 <br/><br/>

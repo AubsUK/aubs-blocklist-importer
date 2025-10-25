@@ -26,6 +26,7 @@
 ##			Also allows an override to send one Success/Failure after the opposite is received, even
 ##			  if it shouldn't email on those days.
 ##  v0.3.0 - 2025-10-11 Added netfilter-persistent to maintain the list after a reboot
+##          Removed irrelevant reference to ruby
 ##
 ############################################################
 ############################################################
@@ -192,65 +193,15 @@ SendEmailNow()
 	LAST_STATUS_READ="`head -1 $LAST_RUN_STATUS`"
 	if [ $LAST_STATUS_READ ]
 	then
-		LAST_DAY="${LAST_STATUS_READ:7}"
-		LAST_STATUS="${LAST_STATUS_READ::-1}"
+		# Get the last character (the day)
+		LAST_DAY="${LAST_STATUS_READ: -1}"
+		# Get everything *except* the last character (the status)
+		LAST_STATUS="${LAST_STATUS_READ:0:-1}"
 	fi
-#Overwrite the LAST_RUN_STATUS file
+
+    #Overwrite the LAST_RUN_STATUS file
 	LogThis "Writing last status of [$CURRENT_STATUS$DOW] to $LAST_RUN_STATUS"
 	echo "$CURRENT_STATUS$DOW" > $LAST_RUN_STATUS
-
-echo "CURRENT_STATUS: $CURRENT_STATUS"
-echo "EMAIL_SUCCESS_DAYS: $EMAIL_SUCCESS_DAYS"
-echo "EMAIL_SUCCESS_TYPE: $EMAIL_SUCCESS_TYPE"
-echo "EMAIL_FAILURE_DAYS: $EMAIL_FAILURE_DAYS"
-echo "EMAIL_FAILURE_TYPE: $EMAIL_FAILURE_TYPE"
-echo "LAST_DAY: $LAST_DAY"
-echo "LAST_STATUS: $LAST_STATUS"
-echo "EMAIL_FAILURE_SUCCESS_OVERRIDE: $EMAIL_FAILURE_SUCCESS_OVERRIDE"
-
-echo "----------"
-if [[ $EMAIL_FAILURE_DAYS == *$DOW* ]]; then echo "EMAIL_FAILURE_DAYS matches today"; else echo "EMAIL_FAILURE_DAYS NOT matches today"; fi
-if [[ "$EMAIL_FAILURE_TYPE" == "ALL" ]]; then echo "EMAIL_FAILURE_TYPE matches ALL"; else echo "EMAIL_FAILURE_TYPE NOT matches ALL"; fi
-if [[ $LAST_DAY -ne $DOW ]]; then echo "LAST_DAY NOT matches current day"; else echo "LAST_DAY matches current day"; fi
-if [[ "$EMAIL_FAILURE_TYPE" == "FIRST" ]]; then echo "EMAIL_FAILURE_TYPE matches FIRST"; else echo "EMAIL_FAILURE_TYPE NOT matches FIRST"; fi
-if [[ "$LAST_STATUS" == "SUCCESS" ]]; then echo "LAST_STATUS matches SUCCESS"; else echo "LAST_STATUS NOT matches SUCCESS"; fi
-if [[ "$EMAIL_FAILURE_SUCCESS_OVERRIDE" == true ]]; then echo "EMAIL_FAILURE_SUCCESS_OVERIDE matches TRUE"; else echo "EMAIL_FAILURE_SUCCESS_OVERIDE NOT matches TRUE "; fi
-echo "----------"
-
-
-	if [ $CURRENT_STATUS == "SUCCESS" ]
-	then
-		echo "Success"
-		# If today is one of the success days AND
-		#   If TYPE is ALL
-		#     OR
-		#   If the last run day is not today and Type is FIRST
-		#   OR
-		# LAST_STATUS was failure, now success, and override is true
-
-		if [[ ( ( $EMAIL_SUCCESS_DAYS == *$DOW* ) && ( ( "$EMAIL_SUCCESS_TYPE" == "ALL" ) || ( $LAST_DAY -ne $DOW && "$EMAIL_SUCCESS_TYPE" == "FIRST" ) ) ) || ( ( "$LAST_STATUS" == "FAILURE" && "$EMAIL_FAILURE_SUCCESS_OVERRIDE" == true ) ) ]]
-		then :
-		else
-			echo "NOT sending success email"
-			SEND_TODAY=false
-		fi
-	else
-		echo "Failure"
-		# If today is one of the failure days AND
-		#   If TYPE is ALL
-		#     OR
-		#   If the last run day is not today and Type is FIRST
-		#     OR
-		#   LAST_STATUS was success, now failure, and override is true
-
-		if [[ ( ( $EMAIL_FAILURE_DAYS == *$DOW* ) && ( ( "$EMAIL_FAILURE_TYPE" == "ALL" ) || ( $LAST_DAY -ne $DOW && "$EMAIL_FAILURE_TYPE" == "FIRST" ) ) ) || ( ( "$LAST_STATUS" == "SUCCESS" && "$EMAIL_FAILURE_SUCCESS_OVERRIDE" == true ) ) ]]
-		then :
-		else
-			echo "NOT sending failure email"
-			SEND_TODAY=false
-		fi
-	fi
-
 
 if [[ $SEND_TODAY == true ]]
 then
@@ -644,7 +595,7 @@ else
 		#    Set the failure message
 		#    show the Validation Check 1 rows in red
 		#    show the Validation Check 2 rows in black
-		VALIDATION_STATUS="ERROR - Newest IP list update Faulure"
+		VALIDATION_STATUS="ERROR - Newest IP list update Failure"
 		VALIDATION_MESSAGE="<p style="color:red"><strong>VALIDATION FAILED - Reverted to previous known good list</strong></p>"
 		VALIDATION_CHECK1="color:red;"
 		VALIDATION_CHECK2=""
