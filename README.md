@@ -201,6 +201,8 @@ sudo sh -c 'echo -e "Subject: Email Relay Test\n\nTesting direct delivery." | se
 
 
 ### General packages
+> [!TIP]
+> The `git` packages aren't required if creating the script manually.
 Ensure the following packages are installed:
 ```bash
 sudo apt install git iptables ipset coreutils grep wget python3 netfilter-persistent ipset-persistent
@@ -230,6 +232,9 @@ sudo /usr/local/sbin/aubs-blocklist-importer/aubs-blocklist-importer.sh --legacy
 ```
 
 ## Prepare the Override files
+> [!IMPORTANT]
+> When using multiple servers that 'talk' to each other, it might be important to add them to the allow-list so that they don't get blocked.  This isn't essential, but if one server ends up on a blocklist, the communication will fail.
+
 Edit `override-allowlist.txt` to include IPs to never block (e.g. known-safe servers or networks) and `override-blocklist.txt` to always block (servers that frequently attack).  CIDR format (e.g. 192.168.1.0/24) is fully supported.  (If either file isn't created or populated now, they'll automatically be created empty in the directory set in `OVERRIDE_PATH` on the first `--overrides` run).
 ```bash
 sudo nano override-allowlist.txt
@@ -248,7 +253,7 @@ Add in entries like the following.
 
 ```bash
 # Blocklist Importer
-00 8,20 * * * root  /usr/local/sbin/aubs-blocklist-importer/aubs-blocklist-importer.sh --overrides                                                                                            # Run at 08:00 and 20:00
+00 8,20 * * * root  /usr/local/sbin/aubs-blocklist-importer/aubs-blocklist-importer.sh --overrides                                                                                                # Run at 08:00 and 20:00
 05 8,20 * * * root  /usr/local/sbin/aubs-blocklist-importer/aubs-blocklist-importer.sh --listname blocklist-de --mincount 100 --url "http://lists.blocklist.de/lists/all.txt"                     # Run at 08:05 and 20:05
 10 8,20 * * * root  /usr/local/sbin/aubs-blocklist-importer/aubs-blocklist-importer.sh --listname spamhaus-drop --mincount 100 --url "https://www.spamhaus.org/drop/drop.txt"                     # Run at 08:10 and 20:10
 15 8,20 * * * root  /usr/local/sbin/aubs-blocklist-importer/aubs-blocklist-importer.sh --listname firehol-level1 --mincount 100 --url "https://iplists.firehol.org/files/firehol_level1.netset"   # Run at 08:15 and 20:15
