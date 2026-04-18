@@ -50,7 +50,7 @@ This is a fast multi-blocklist import script using `ipset` and the `iptables` `r
 - Imports a list of IPs to block from a URL text file.
 - Supports managing multiple different blocklists using command-line arguments.
 - Drops traffic at the `PREROUTING` stage (before connection tracking), minimising `conntrack` overhead for maximum efficiency.
-- Strips out anything non-IPv4 related and makes sure IP ranges are correctly formatted (e.g. normalises `192.168.1.5/24` to `192.168.1.0/24`) via an inline Python 3 function.
+- Strips out anything non-IPv4 related and makes sure IP ranges are correctly formatted (e.g. normalises `192.168.1.5/24` to `192.168.1.0/24`) via an inline Python 3 script.
 - Removes duplicates.
 - Custom lists to override IPs in imported blocklists:
   - Override Allowlist - Never block anything on this list even if it *is* in a downloaded blocklist (e.g. own or trusted IPs).
@@ -63,13 +63,13 @@ This is a fast multi-blocklist import script using `ipset` and the `iptables` `r
 1. Uses `flock` to ensure only one instance of the script runs for a specific list at any time.
 2. Checks for an existing parent chain and ensures everything is already set up.
 3. Downloads the target list and verifies the line count against the `MIN_COUNT` threshold.
-4. Processes the list through a Python 3 function to validate IPv4 structures and normalise CIDR boundaries.
+4. Processes the list through a Python 3 script to validate IPv4 structures and normalise CIDR boundaries.
 5. Compares the new import blocklist against the existing blocked list using `comm`:
    - Only imports new IPs.
    - Removes old IPs not on the new list.
 6. Verifies that the applied `ipset` exactly matches the filtered source list.
 7. Changes are applied incrementally, then validated against the source.  If validation fails, it clears the configuration and safely restores the previous known-good list.
-8. If validation succeeds, it saves the persistent firewall state via `netfilter-persistent`.
+8. If validation succeeds, it saves the sanitised persistent firewall state via `netfilter-persistent`.
 
 <br/>
 
@@ -82,11 +82,22 @@ This is a fast multi-blocklist import script using `ipset` and the `iptables` `r
 > [!WARNING]
 > When updating from a previous version, review the '[Upgrading from v0.3.0 or earlier](#upgrading-from-v030-or-earlier)' section within the 'Guided Setup'.
 
+> [!WARNING]
+> If a Mail Transfer Agent (MTA) (e.g. Postfix or Sendmail) is already installed, another does not need to be installed.
+>
+> Review the '[Mail Transfer Agent (MTA)](#mail-transfer-agent-mta)' section within the 'Guided Setup'.
+
 > [!TIP]
 > To make sure the blocklists are kept up to date, review the '[Configure Cron](#configure-cron)' section within the 'Guided Setup'.
 
 ```bash
-sudo apt install iptables ipset coreutils sendmail grep wget python3 netfilter-persistent ipset-persistent
+# An MTA is required for email notifications (see the warning block above for options).
+# sudo apt install postfix
+# ...Select "Satellite system"
+# ...Provide FQDN of the server
+# ...Provide FQDN of the mail server
+sudo apt install git iptables ipset coreutils grep wget python3 netfilter-persistent ipset-persistent
+
 cd /usr/local/sbin
 sudo git clone https://github.com/AubsUK/aubs-blocklist-importer
 cd aubs-blocklist-importer
@@ -108,9 +119,91 @@ sudo ./aubs-blocklist-importer.sh --listname blocklist-de --mincount 100 --url "
 |[Back to top](#contents)|
 
 ## Prerequisites
+
+### Mail Transfer Agent (MTA)
+
+> [!IMPORTANT]
+> A Mail Transfer Agent (MTA) (e.g. Postfix or Sendmail) is needed for this script to send emails.  If one is already installed, another does not need to be installed.  If emails are not required, ignore this step
+> Test to see if an MTA is set up by running the following command (replacing the email address with a valid one).  An email should be received:
+> ```bash
+> echo -e "Subject: Postfix Queue Test\n\nTesting the queuing relay." | /usr/sbin/sendmail -v destination_email@domain.co.uk
+> ```
+
+<details>
+<summary>More details on setting up postfix as an MTA</summary>
+
+Install Postfix:
+```bash
+sudo apt install postfix
+```
+Postfix will offer several prompts:
+1. When using a dedicated mail server, choose `Satellite system`.
+2. System mail name: Leave as the server's default FQDN (e.g. myserver.domain.co.uk).
+3. SMTP Relay Host: Enter the hostname (e.g. mail.domain.co.uk) [If using an IP to avoid any DNS/MX lookups, enter the IP in square brackets].
+
+Make sure the config file is completely locked down so the server is not running an open relay:
+```bash
+sudo nano /etc/postfix/main.cf
+```
+Check for these two lines towards the bottom:
+```text
+relayhost = mail.domain.co.uk OR relayhost = [10.1.2.3]
+inet_interfaces = loopback-only
+```
+Apply the changes:
+```bash
+sudo systemctl restart postfix
+```
+Test the configuration:
+```bash
+echo -e "Subject: Postfix Queue Test\n\nTesting the queuing relay." | /usr/sbin/sendmail -v destination_email@domain.co.uk
+```
+</details>
+
+<details>
+<summary>More details on setting up msmtp as a lightweight MTA</summary>
+
+`msmtp` can be installed with [THIS IS UNTESTED]:
+```bash
+sudo apt install msmtp msmtp-mta
+```
+and configured with:
+```bash
+sudo nano /etc/msmtprc
+```
+entering:
+```text
+# System-wide msmtp configuration for relay
+defaults
+auth           off
+tls            off
+syslog         on
+
+# The Relay Mail Server
+account        user_name # Replace with the user account for the mail server
+host           10.x.x.x  # Replace with the mail server's IP/hostname
+port           25        # Standard unencrypted SMTP port
+from           root@myserver
+
+# Set as default
+account default : user_name
+```
+then securing it with:
+```bash
+sudo chown root:root /etc/msmtprc
+sudo chmod 600 /etc/msmtprc
+```
+Finally, it can be tested with:
+```bash
+sudo sh -c 'echo -e "Subject: Email Relay Test\n\nTesting direct delivery." | sendmail -v destination_email@domain.co.uk'
+```
+</details>
+
+
+### General packages
 Ensure the following packages are installed:
 ```bash
-sudo apt install iptables ipset coreutils sendmail grep wget python3 netfilter-persistent ipset-persistent
+sudo apt install git iptables ipset coreutils grep wget python3 netfilter-persistent ipset-persistent
 ```
 
 ## Prepare the Script
@@ -1032,7 +1125,7 @@ Wed Apr  1 22:12:20.664 BST 2026 [Global-Reset]:  ==============================
 ### IPSet cannot be destroyed
 - The error "Set cannot be destroyed: it is in use by a kernel component", probably means the `iptables` rule linking the `ipset` needs to be removed first:
 ```bash
-# delete the iptables rule linking the ipset before destroying the ipset:
+# Delete the iptables rule linking the ipset before destroying the ipset:
 sudo iptables -t raw -D Aubs-Blocklists -m set --match-set aubs-test src -j RETURN
 sudo ipset destroy Aubs-test
 ```
