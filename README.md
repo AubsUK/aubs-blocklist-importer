@@ -659,6 +659,12 @@ And the third is used after the first validation check fails, which then pretend
  4. Remove the variables for the programs being used, I don't really think these are necessary because the ones being used are mostly 'standard'.
  5. Warn if any 'override allow' exist in the blocklist.
  6. If a run results in a 'success' but errors or critical, it should send a FAILURE email.
+ 7. If there's a critical error, we shouldn't save the persistent firewall rules.
+ 8. If we remove a list or perform a global reset, we should save the persistent firewall rules.
+ 9. Add email notifications for Override Allowlist and Override Blocklist success/failures.
+ 10. Add a switchable schedule to loop through and normalise IPs in the Override Blocklist that form larger subnets.  For example, if there are 4 or more from a /24 (IPv4) or /64 (IPv6), remove them all and add a single /24 or /64 with a comment confirming the IP range and date range captured.
+ 11. Add the allowlist to the top of the filter table's INPUT chain so it can't get blocked by Fail2Ban... OR, probably better if possible, add the allowlist to Fail2Ban's ignoreip list ONLY IF IT CHANGES, because that would still restrict it to generic firewall rules.
+ 12. Check and install basic cron entries (via a switch) to /etc/cron.d/.
 
 <details>
 <summary>Click to expand list of completed changes</summary>
