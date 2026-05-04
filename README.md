@@ -665,6 +665,7 @@ And the third is used after the first validation check fails, which then pretend
  10. Add a switchable schedule to loop through and normalise IPs in the Override Blocklist that form larger subnets.  For example, if there are 4 or more from a /24 (IPv4) or /64 (IPv6), remove them all and add a single /24 or /64 with a comment confirming the IP range and date range captured.
  11. Add the allowlist to the top of the filter table's INPUT chain so it can't get blocked by Fail2Ban... OR, probably better if possible, add the allowlist to Fail2Ban's ignoreip list ONLY IF IT CHANGES, because that would still restrict it to generic firewall rules.
  12. Check and install basic cron entries (via a switch) to /etc/cron.d/.
+ 13. Possible option, but this may make it into a "firewall manager" rather than a "blocklist" ... Whilst it is good to block other cloud providers entirely, some services may still need to be accessible to them (e.g. DNS, SMTP, HTTP/S, etc.).  Add in Exception AllowLists for specific cloud providers (e.g. Google-Cloud, AWS, etc.) after the active blocklists, to allow access only to specific ports, and drop access to any other services (e.g. SSH, MySQL, Web Control Panels, FTP, VPNs, etc.).
 
 <details>
 <summary>Click to expand list of completed changes</summary>
